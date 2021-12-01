@@ -1,0 +1,17 @@
+# IntelliJ project files
+.idea/*
+
+# visual studio code files
+.vscode
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+cover.html
+
+# build files
+bin/
+
+# Js output
+out/
+.DS_Store
