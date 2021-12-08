@@ -16,8 +16,8 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "github.com/acekingke/yaccgo",
-	Short: "github.com/acekingke/yaccgo is a yacc generator",
+	Use:   "yaccgo",
+	Short: "yaccgo is a yacc generator",
 	Long:  "Understandable yacc generator , it can generate go/js/rust code",
 	Run:   nil,
 }

@@ -16,7 +16,7 @@ bin/yaccgo generate typescript examples/exprts.y expts.ts
 
 ```
 at your `y `file  You should do as follower
-
+more in [manual](./Docs/manual.md)
 # Design
 
 LALR1 Algorithm Base on

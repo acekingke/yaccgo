@@ -203,7 +203,7 @@ func ReduceFunc(reduceIndex int) *StateSym {
 		caseCode += fmt.Sprintf("case %d: \n", i)
 		rightPartlen := len(productionRule.RighPart)
 		caseCode += fmt.Sprintf("\tdollarDolar.YySymIndex = %d\n", productionRule.LeftPart.ID)
-		caseCode += fmt.Sprintf("\tDollar := StateSymStack[topIndex-%d : StackPointer]\n", rightPartlen)
+		caseCode += fmt.Sprintf("\tDollar := StateSymStack[topIndex-%d : StackPointer]\n\t_ = Dollar\n", rightPartlen)
 		//fetch the action code here
 		caseCode += actionCodeReplace(b.vnode, i, productionRule)
 		caseCode += fmt.Sprintf("\tPopStateSym(%d)\n", rightPartlen)
