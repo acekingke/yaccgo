@@ -1,4 +1,5 @@
 # YaccGo
+[![License](https://img.shields.io/badge/license-MIT-blue)](https://opensource.org/licenses/MIT)
 Through Google has tool about yacc named goyacc, But it generate go code can not debug! see the issue 
 
 https://github.com/golang/vscode-go/issues/1674#event-5612030543 
