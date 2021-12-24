@@ -81,9 +81,9 @@ precedence define
 all parts will persent as follow:
 
 * header codes
- 
+
  header codes are wrap by `%{ %}`,Usually they contain import codes, const defines , global variables define and so on.
- 
+
   **example**
   ```
   %{
@@ -99,16 +99,16 @@ all parts will persent as follow:
 	%}
   ```
 * start define 
- 
+
  start define specify nonterminal symbol start in grammar. 
   ```
   %start nonterminal
   ```
- 
+
  **example**
 ```
 %start E
-``` 
+```
 indicate E is the start symbol in grammar.
 
 * sematics value type define
@@ -162,8 +162,57 @@ if `%token` is not following with interger-value, the system specify identificat
 
 * precedence define
 
+  Precedence is a method to resolve shift/reduce conflict. for example, if the rule is
+
+  ```
+  ...
+  %%
+  expr	   : expr '=' expr    
+         	| expr '+' expr 
+         	| expr '-' expr 
+         	| expr '*' expr 
+           | expr '/' expr 
+         	| NAME 
+         	
+  ```
+
+  When `expr + expr  ` ,and next symbol is '\*', Parser do not know should shift symbol  '*' , or reduce `expr + expr  ` to expr . this grammar is ambiguous, but you do not need to rewrite the grammar, just use precedence can resolve the confict.precedence has keywords:` %left`, `%right`,  `%nonassoc` or `%precedence` , followed by  tokens. 
+  
+  Thus:
+  
+  ```
+  %left '+' '-' 
+  %left '*' '/'
+  ```
+  
+  in define above,  '+', '-' is left associative, and lower precedence than '*' and '/' .  if the operators is not associative , use  `%nonassoc` or `%precedence` 
+
 ### Rules
-wating more...
+
+rules form is :
+
+```
+A : Body {Actions}
+```
+
+`A` represents a nonterminal symbol, `Body `represents a list of zero or more symbol,(containing terminal symbols or nonterminal symbols) .
+
+ rules (or production rules ) has three parts. 
+
+* Left part : At the beginning of the rule, such as `A` above, followed by`:`
+* Body or Right part: after `:` , a list of symbols.
+* Actions: after the Body，one or more statements enclosed in { and }.  `$` specify  pseudo-variable for action operate the symbol sematics value. `$$` represents the left part sematics value, `$n`( n is number starting from 1) specify the nth symbol's  sematic value .
+
+**for examples**
+
+```
+expr		   : expr '+' expr 
+        	{ 
+           		$$ = node( '+', $1, $3 ); 
+         }
+```
+
+
 
 ### Programs
-Wating more...
+Other subroutines.
