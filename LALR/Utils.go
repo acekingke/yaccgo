@@ -41,7 +41,12 @@ func (lalr *LALR1) ShowDrSet() {
 	for trIndex, set := range lalr.DRSet {
 		q := lalr.trans[trIndex].q
 		symName := lalr.fetchSymbol(int(lalr.trans[trIndex].sym_or_rule)).Name
-		fmt.Printf("%d--%s--> %v\n", q, symName, set)
+		var str_set string = "["
+		for _, v := range set {
+			str_set += lalr.fetchSymbol(v).Name + " "
+		}
+		str_set += " ]"
+		fmt.Printf("%d--%s--> %s\n", q, symName, str_set)
 	}
 }
 
@@ -49,7 +54,12 @@ func (lalr *LALR1) ShowReadSet() {
 	for trIndex, set := range lalr.ReadSet {
 		q := lalr.trans[trIndex].q
 		symName := lalr.fetchSymbol(int(lalr.trans[trIndex].sym_or_rule)).Name
-		fmt.Printf("%d--%s--> %v\n", q, symName, set)
+		var str_set string = "["
+		for _, v := range set {
+			str_set += lalr.fetchSymbol(v).Name + " "
+		}
+		str_set += " ]"
+		fmt.Printf("%d--%s--> %s\n", q, symName, str_set)
 	}
 }
 

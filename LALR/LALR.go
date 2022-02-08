@@ -162,7 +162,7 @@ func (lalr *LALR1) CalcDR() {
 	//set the start -> S' Dr is $ sym
 	// 0 index transistor is I0--S'-->
 	// 1 is dollor symbol
-	lalr.DRSet[0] = []int{1}
+	lalr.DRSet[0] = append(lalr.DRSet[0], []int{1}...)
 }
 
 //-----------------Caculate the Includes relation-------------
@@ -262,8 +262,14 @@ func ComputeLALR(g *grammar.Grammar) *LALR1 {
 		for k := range lalr.trans {
 			fmt.Println(lalr.showTrans(k))
 		}
-		fmt.Println("==========LOOKAHEAD SET===============")
+		fmt.Println("==========Show Direct Read SET===============")
+		lalr.ShowDrSet()
+		fmt.Println("==========Show Reads SET===============")
+		lalr.ShowReadSet()
+		fmt.Println("==========Show FollowSet SET===============")
 		lalr.ShowFollowSet()
+		fmt.Println("==========Show LookAhead SET===============")
+		lalr.ShowLookAheadSet()
 	}
 
 	if tab, err := lalr.GenTable(); err != nil {
