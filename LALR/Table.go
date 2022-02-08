@@ -158,10 +158,14 @@ func (lalr *LALR1) GenTable() ([][]int, error) {
 		} else {
 			row := make([]int, len(lalr.G.Symbols))
 			for i := 0; i < len(row); i++ {
-				row[i] = lalr.GenErrorCode()
+				row[i] = 0
 			}
 			for syInd, act := range set {
-				row[syInd] = act[0].ActionIndex
+				if act[0].ActionIndex != 0 {
+					row[syInd] = act[0].ActionIndex
+				} else {
+					row[syInd] = lalr.GenAcceptCode()
+				}
 			}
 			tableGen = append(tableGen, row)
 		}

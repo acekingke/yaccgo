@@ -43,7 +43,7 @@ func (b *GoBuilder) buildConstPart() {
 			b.ConstPart += fmt.Sprintf("const %s = %d\n", identifier.Name, identifier.Value)
 		}
 	}
-	b.ConstPart += fmt.Sprintf("const ERROR_ACTION = %d\nconst ACCEPT_ACTION = 0\n", b.vnode.GenErrorCode())
+	b.ConstPart += fmt.Sprintf("const ERROR_ACTION = 0\nconst ACCEPT_ACTION = %d\n", b.vnode.GenAcceptCode())
 }
 
 func (b *GoBuilder) buildUionAndCode() {
