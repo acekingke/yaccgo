@@ -12,6 +12,7 @@ import (
 	item "github.com/acekingke/yaccgo/Items"
 	rule "github.com/acekingke/yaccgo/Rules"
 	symbol "github.com/acekingke/yaccgo/Symbol"
+	utils "github.com/acekingke/yaccgo/Utils"
 )
 
 func TestUnion(t *testing.T) {
@@ -367,6 +368,13 @@ func TestLALR1_ambiguity(t *testing.T) {
 				fmt.Printf("%d,\t", val)
 			}
 			fmt.Println("},")
+		}
+		act, off, check := utils.PackTable(tab)
+		if len(act)+len(off)+len(check) > len(lalr.G.LR0.LR0Closure)*len(lalr.G.Symbols) {
+			fmt.Println("The table is no need to pack")
+		} else {
+			fmt.Println("The table is packed")
+
 		}
 	}
 
