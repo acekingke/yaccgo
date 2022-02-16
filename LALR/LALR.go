@@ -9,6 +9,7 @@ import (
 	"sort"
 
 	grammar "github.com/acekingke/yaccgo/Grammar"
+
 	utils "github.com/acekingke/yaccgo/Utils"
 )
 
@@ -21,6 +22,11 @@ type LALR1 struct {
 	FollowSet,
 	LookAheadSet map[int][]int
 	NumOfStates int //States number
+	// The last is for pack table
+	NeedPacked  bool
+	ActionTable []int
+	OffsetTable []int
+	CheckTable  []int
 }
 
 // q --t--> p
@@ -276,7 +282,22 @@ func ComputeLALR(g *grammar.Grammar) *LALR1 {
 		panic(err.Error())
 	} else {
 		lalr.GTable = tab
+		// try to pack the table
+		act, off, check := utils.PackTable(lalr.GTable)
+		lalr.NeedPacked = false
 		lalr.NumOfStates = len(lalr.G.LR0.LR0Closure)
+		if len(act)+len(off)+len(check) > lalr.NumOfStates*len(lalr.G.Symbols) {
+			if utils.DebugFlags {
+				fmt.Println("The table is no need to pack")
+			}
+		} else {
+			if utils.DebugFlags {
+				fmt.Println("The table is packed")
+			}
+			lalr.NeedPacked = true
+			lalr.ActionTable, lalr.OffsetTable, lalr.CheckTable = act, off, check
+		}
+
 	}
 	return lalr
 }
