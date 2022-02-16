@@ -25,7 +25,9 @@
 %%
 PROG:
     /*empty*/
-    | PROG E NL
+    | PROG E NL {
+		fmt.Println($2)
+	}
 E:
 	E PLUS E {
 		$$	=	$1 + $3

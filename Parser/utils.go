@@ -4,7 +4,9 @@ Use of this source code is governed by MIT license that can be found in the LICE
 */
 package parser
 
-import "strings"
+import (
+	"strings"
+)
 
 func genTempName(in string) string {
 	return "$operator" + in

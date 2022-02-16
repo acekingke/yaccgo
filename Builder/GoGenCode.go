@@ -247,8 +247,14 @@ func GoGenFromString(input string, file string) error {
 	b := NewGoBuilder(w)
 	b.buildConstPart()
 	b.buildUionAndCode()
-	b.buildAnalyTable()
-	b.buildStateFunc()
+	if b.vnode.NeedPacked {
+		b.buildAnalyPackTable()
+		b.buildPackStateFunc()
+	} else {
+		b.buildAnalyTable()
+		b.buildStateFunc()
+	}
+
 	b.buildReduceFunc()
 	b.buildTranslate()
 	// Create file and write to it
