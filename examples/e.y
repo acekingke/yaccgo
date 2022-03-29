@@ -4,6 +4,7 @@ import "fmt"
 %}
 
 %token   'n'
+%token EOF -1
 %start L
 %%
 L :  /*empty*/

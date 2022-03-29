@@ -107,6 +107,9 @@ func rootState(l *lexer) stateFn {
 		l.backup()
 		l.acceptRun("0123456789")
 		l.emit(Number)
+	case r == '-':
+		l.acceptRun("0123456789")
+		l.emit(Number)
 	case r == '{':
 		return ActionQuoteState
 

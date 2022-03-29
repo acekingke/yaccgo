@@ -135,7 +135,7 @@ func Parser(input string) *ValType {
 		s := &StateSymStack[StackPointer-1]
 		a := s.Action(lookAhead)
 		if a == ERROR_ACTION {
-			panic("Grammer error")
+			panic("Grammar parse error")
 		} else if a == ACCEPT_ACTION {
 			return &s.ValType
 		} else {

@@ -234,6 +234,9 @@ func (w *Walker) BuildLALR1() *lalr.LALR1 {
 		//1. create symbo
 		index := 1
 		for _, id := range v.idsymtabl {
+			if id.Value == -1 {
+				continue
+			}
 			index++
 			sy := symbol.NewSymbol(uint(index), id.Name)
 			sy.SetValue(id.Value)
