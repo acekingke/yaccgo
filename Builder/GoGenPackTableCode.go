@@ -54,7 +54,17 @@ func (s *StateSym) Action(a int) int {
 		return StatePackAction[StatePackOffset[s.Yystate]+a]
 	}
 }
-
+func PushContex() {
+	globalContext = append(globalContext, Context{
+		StackSym: StateSymStack,
+		Stackpos: StackPointer,
+	})
+}
+func PopContex() {
+	StackPointer = globalContext[len(globalContext)-1].Stackpos
+	StateSymStack = globalContext[len(globalContext)-1].StackSym
+	globalContext = globalContext[:len(globalContext)-1]
+}
 func init() {
 	ParserInit()
 }
@@ -84,7 +94,7 @@ func Parser(input string) *ValType {
 		s := &StateSymStack[StackPointer-1]
 		a := s.Action(lookAhead)
 		if a == ERROR_ACTION {
-			panic("Grammer error")
+			panic("Grammar parse error")
 		} else if a == ACCEPT_ACTION {
 			return &s.ValType
 		} else {

@@ -13,6 +13,7 @@ import (
 
 	parser "github.com/acekingke/yaccgo/Parser"
 	rules "github.com/acekingke/yaccgo/Rules"
+	utils "github.com/acekingke/yaccgo/Utils"
 )
 
 type GoBuilder struct {
@@ -50,6 +51,13 @@ func (b *GoBuilder) buildUionAndCode() {
 	str := `
 var StateSymStack = []StateSym{}
 var StackPointer = 0
+type Context struct {
+	StackSym []StateSym
+	Stackpos int
+}
+
+var globalContext = []Context{}
+
 type ValType struct {
 	%s
 }
@@ -113,7 +121,17 @@ func (s *StateSym) Action(a int) int {
 func init() {
 	ParserInit()
 }
-
+func PushContex() {
+	globalContext = append(globalContext, Context{
+		StackSym: StateSymStack,
+		Stackpos: StackPointer,
+	})
+}
+func PopContex() {
+	StackPointer = globalContext[len(globalContext)-1].Stackpos
+	StateSymStack = globalContext[len(globalContext)-1].StackSym
+	globalContext = globalContext[:len(globalContext)-1]
+}
 func ParserInit() {
 	StateSymStack = []StateSym{
 		{
@@ -251,7 +269,7 @@ func GoGenFromString(input string, file string) error {
 	b := NewGoBuilder(w)
 	b.buildConstPart()
 	b.buildUionAndCode()
-	if b.vnode.NeedPacked {
+	if b.vnode.NeedPacked && utils.PackFlags {
 		b.buildAnalyPackTable()
 		b.buildPackStateFunc()
 	} else {

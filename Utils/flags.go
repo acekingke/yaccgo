@@ -5,3 +5,4 @@ Use of this source code is governed by MIT license that can be found in the LICE
 package utils
 
 var DebugFlags = false
+var PackFlags = true
