@@ -111,6 +111,10 @@ func (s *StateSym) Action(a int) int {
 }
 
 func init() {
+	ParserInit()
+}
+
+func ParserInit() {
 	StateSymStack = []StateSym{
 		{
 			Yystate:    0,
