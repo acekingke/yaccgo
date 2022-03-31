@@ -34,6 +34,7 @@ func (b *GoBuilder) buildPackStateFunc() {
 	b.StateFunc = `
 // Push StateSym
 func PushStateSym(state *StateSym) {
+	TraceShift(state)
 	if StackPointer >= len(StateSymStack) {
 		StateSymStack = append(StateSymStack, *state)
 	} else {
@@ -94,7 +95,8 @@ func Parser(input string) *ValType {
 		s := &StateSymStack[StackPointer-1]
 		a := s.Action(lookAhead)
 		if a == ERROR_ACTION {
-			panic("Grammar parse error")
+			lines := strings.Split(input[:currentPos], "\n")
+			panic("Grammar parse error near :" + lines[len(lines)-1])
 		} else if a == ACCEPT_ACTION {
 			return &s.ValType
 		} else {
@@ -112,6 +114,7 @@ func Parser(input string) *ValType {
 				s := &StateSymStack[StackPointer-1]
 				gotoState := s.Action(SymTy.YySymIndex)
 				SymTy.Yystate = gotoState
+				TraceReduce(reduceIndex, gotoState, TraceTranslate(lookAhead))
 				PushStateSym(SymTy)
 			}
 		}

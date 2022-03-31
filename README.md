@@ -22,6 +22,37 @@ bin/yaccgo generate typescript examples/exprts.y expts.ts
 ```
 at your `y `file  You should do as follower
 more in [manual](./Docs/manual.md)
+
+# Trace
+After generate the parse code, modify the `var IsTrace bool = false` to `var IsTrace bool = true` , then you can see the trace of the parser. feature completed for go, other are WIP.
+for example:
+```
+bin/yaccgo generate go examples/ladd.y out/ladd.go
+```
+then you modify the ladd.go file, change code `var IsTrace bool = false` to `var IsTrace bool = true`, then
+```
+go run out/ladd.go
+```
+You can see trace information
+```
+look ahead NUM, use Reduce:PROG -> , go to state 1
+Shift PROG, push state 1
+Shift NUM, push state 3
+look ahead PLUS, use Reduce:E -> NUM , go to state 2
+Shift E, push state 2
+Shift PLUS, push state 5
+Shift NUM, push state 3
+look ahead NL, use Reduce:E -> NUM , go to state 6
+Shift E, push state 6
+look ahead NL, use Reduce:E -> E PLUS E , go to state 2
+Shift E, push state 2
+Shift NL, push state 4
+3
+look ahead $, use Reduce:PROG -> PROG E NL , go to state 1
+Shift PROG, push state 1
+0
+```
+
 # Design
 
 LALR1 Algorithm Base on

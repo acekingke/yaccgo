@@ -27,11 +27,13 @@ type GoBuilder struct {
 	StateFunc  string
 	ReduceFunc string
 	Translate  string
+	// ReduceTrace funciton
+	ReduceTrace string
 }
 
 func NewGoBuilder(w *parser.Walker) *GoBuilder {
 	return &GoBuilder{
-		HeaderPart: `/*Generator Code , do not modify*/\n`,
+		HeaderPart: `/*Generator Code , do not modify*/\n import "strings"\n`,
 		vnode:      w.VistorNode.(*parser.RootVistor),
 	}
 }
@@ -49,6 +51,7 @@ func (b *GoBuilder) buildConstPart() {
 
 func (b *GoBuilder) buildUionAndCode() {
 	str := `
+var IsTrace bool = false
 var StateSymStack = []StateSym{}
 var StackPointer = 0
 type Context struct {
@@ -71,7 +74,7 @@ type StateSym struct {
 }`
 	str = fmt.Sprintf(str, b.vnode.GetUion())
 	b.UnionPart = str
-	b.CodeHeader = b.vnode.GetCode()
+	b.CodeHeader = b.vnode.GetCode() + "\n import \"strings\"\n"
 	b.CodeLast = b.vnode.GetCodeCopy()
 }
 
@@ -101,6 +104,7 @@ func (b *GoBuilder) buildStateFunc() {
 	b.StateFunc = `
 // Push StateSym
 func PushStateSym(state *StateSym) {
+	TraceShift(state)
 	if StackPointer >= len(StateSymStack) {
 		StateSymStack = append(StateSymStack, *state)
 	} else {
@@ -157,7 +161,8 @@ func Parser(input string) *ValType {
 		s := &StateSymStack[StackPointer-1]
 		a := s.Action(lookAhead)
 		if a == ERROR_ACTION {
-			panic("Grammar parse error")
+			lines := strings.Split(input[:currentPos], "\n")
+			panic("Grammar parse error near :" + lines[len(lines)-1])
 		} else if a == ACCEPT_ACTION {
 			return &s.ValType
 		} else {
@@ -175,6 +180,7 @@ func Parser(input string) *ValType {
 				s := &StateSymStack[StackPointer-1]
 				gotoState := s.Action(SymTy.YySymIndex)
 				SymTy.Yystate = gotoState
+				TraceReduce(reduceIndex, gotoState, TraceTranslate(lookAhead))
 				PushStateSym(SymTy)
 			}
 		}
@@ -205,6 +211,55 @@ func translate(c int) int {
 		}
 	}
 	b.Translate = fmt.Sprintf(str, caseCodes)
+	// build Trace info
+	traceFun := `
+func TraceShift(s *StateSym) {
+	if IsTrace {
+		fmt.Printf("Shift %%s, push state %%d\n", TraceTranslate(s.YySymIndex), s.Yystate)
+	}
+}
+func TraceTranslate(c int) string {
+	var conv string = ""
+	switch c {
+%s
+	}
+	return conv
+}
+
+`
+	caseCodes = ""
+	for _, sy := range b.vnode.G.Symbols {
+		caseCodes += fmt.Sprintf("\tcase %d:\n \tconv = \"%s\"\n", sy.ID, parser.RemoveTempName(sy.Name))
+	}
+	b.Translate += fmt.Sprintf(traceFun, caseCodes)
+}
+
+func (b *GoBuilder) buildReduceTrace() {
+	str := `
+func TraceReduce(reduceIndex, s int, look string) {
+	if IsTrace {
+		switch reduceIndex {
+%s
+		}
+	}
+}
+`
+
+	caseCode := ""
+	for i := 1; i < len(b.vnode.G.ProductoinRules); i++ {
+		caseCode += fmt.Sprintf("\t\tcase %d: \n", i)
+		oneRule := b.vnode.GetRules(i - 1)
+		leftPartString := "use Reduce:" + parser.RemoveTempName(oneRule.LeftPart.Name)
+		var rightPartString string = ""
+		for _, rightPart := range oneRule.RighPart {
+			rightPartString += parser.RemoveTempName(rightPart.Name) + " "
+		}
+		strTrace := fmt.Sprintf("%s -> %s",
+			leftPartString, rightPartString)
+		caseCode += fmt.Sprintf("\n\t\tfmt.Printf(\"look ahead %%s, %s, go to state %%d\\n\", look, s)\n", strTrace)
+	}
+	str = fmt.Sprintf(str, caseCode)
+	b.ReduceTrace = str
 }
 
 // make ReduceFunc
@@ -278,6 +333,7 @@ func GoGenFromString(input string, file string) error {
 	}
 
 	b.buildReduceFunc()
+	b.buildReduceTrace()
 	b.buildTranslate()
 	// Create file and write to it
 	f, err := os.Create(file)
@@ -292,6 +348,7 @@ func GoGenFromString(input string, file string) error {
 	f.WriteString(b.StateFunc)
 	f.WriteString(b.ReduceFunc)
 	f.WriteString(b.Translate)
+	f.WriteString(b.ReduceTrace)
 	f.Close()
 	return nil
 }
