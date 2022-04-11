@@ -15,6 +15,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var unpack bool
 var rootCmd = &cobra.Command{
 	Use:   "yaccgo",
 	Short: "yaccgo is a yacc generator",
@@ -33,13 +34,16 @@ func init() {
 			typescript : generate typescript code",
 			rust : generate rust code",
 		`,
+
 		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) != 3 {
+			if len(args) < 3 {
 				cmd.Help()
 			}
+			utils.PackFlags = !unpack
 			cmdGenerate(args)
 		},
 	}
+	c.Flags().BoolVarP(&unpack, "unpack", "u", false, "useage package")
 	rootCmd.AddCommand(c)
 	debugCmd := &cobra.Command{
 		Use:   "debug input.y",

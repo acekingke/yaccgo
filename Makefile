@@ -14,7 +14,7 @@ all: build test
 
 build:
 	go fmt $(TOP)/...
-	go build -o bin/yaccgo ./Cmd/*.go
+	go build -o bin/yaccgo ./yaccgo/*.go
 
 
 todo:
