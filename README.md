@@ -77,6 +77,10 @@ https://www.youtube.com/watch?v=HxaD_trXwRE
 
    will support Dot Graph by svg
 
+### Project use yaccgo
+
+see [wiki](https://github.com/acekingke/yaccgo/wiki/Project-use-yaccgo)
+and add your own project to it
 ### Contributing
 
 Welcome to contributing, We appreciate your help! please make sure 
