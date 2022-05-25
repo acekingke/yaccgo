@@ -230,10 +230,24 @@ func (w *Walker) BuildLALR1() *lalr.LALR1 {
 	dollar.Value = -1
 	g.InsertNewSymbol(dollar)
 	var SymbolFirst *symbol.Symbol
+	var Idendities []*Idendity = make([]*Idendity, 0)
+	var terminals []*Idendity = make([]*Idendity, 0)
+	var NonTerminals []*Idendity = make([]*Idendity, 0)
+
 	if v, ok := w.VistorNode.(*RootVistor); ok {
 		//1. create symbo
 		index := 1
+		// first move the terminal symbol first
 		for _, id := range v.idsymtabl {
+			if id.IDTyp == TERMID {
+				terminals = append(terminals, id)
+			}
+			if id.IDTyp == NONTERMID {
+				NonTerminals = append(NonTerminals, id)
+			}
+		}
+		Idendities = append(terminals, NonTerminals...)
+		for _, id := range Idendities {
 			if id.Value == -1 {
 				continue
 			}

@@ -112,7 +112,6 @@ func (lalr *LALR1) CheckAndResolveConflict(state int, tranlist []Transistor) (ma
 		}
 	}
 	//Check conflict
-
 	for syIndex, actionlist := range action_set {
 		if len(actionlist) > 1 {
 			// Conflict
@@ -158,7 +157,7 @@ func (lalr *LALR1) GenTable() ([][]int, error) {
 		} else {
 			row := make([]int, len(lalr.G.Symbols))
 			for i := 0; i < len(row); i++ {
-				row[i] = 0
+				row[i] = lalr.GenErrorCode()
 			}
 			for syInd, act := range set {
 				if act[0].ActionIndex != 0 {
@@ -171,6 +170,31 @@ func (lalr *LALR1) GenTable() ([][]int, error) {
 		}
 	}
 	return tableGen, nil
+}
+
+func (lalr *LALR1) SplitActionAndGotoTable(tab [][]int) ([][]int, [][]int) {
+	nTerminals := len(lalr.G.VtSet)
+	nNonTerminals := len(lalr.G.VnSet)
+	fmt.Println("nTerminals", nTerminals, "nNonTerminals", nNonTerminals)
+	actionTable := [][]int{}
+	for i := 0; i < len(tab); i++ {
+		// Copy start symbol and all terminal symbol
+		row := make([]int, nTerminals+1)
+		copy(row, tab[i][:nTerminals+1])
+		actionTable = append(actionTable, row)
+	}
+	// goto table , make row index is symbol ,column index is state.
+	gotoTable := [][]int{}
+	//skip start symbol
+	for i := 0; i < nNonTerminals-1; i++ {
+		row := make([]int, len(tab))
+		for j := 0; j < len(row); j++ {
+			row[j] = tab[j][nTerminals+i+1]
+		}
+		gotoTable = append(gotoTable, row)
+	}
+	return actionTable, gotoTable
+
 }
 
 func getActionTypeName(act E_ActionType) string {

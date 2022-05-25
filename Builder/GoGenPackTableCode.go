@@ -1,3 +1,7 @@
+/*
+Copyright (c) 2021 Ke Yuchang(aceking.ke@gmail.com). All rights reserved.
+Use of this source code is governed by MIT license that can be found in the LICENSE file.
+*/
 package builder
 
 import "fmt"
@@ -49,7 +53,7 @@ func PopStateSym(num int) {
 }
 
 func (s *StateSym) Action(a int) int {
-	if StatePackOffset[s.Yystate]+a >= len(StackPackCheck) || StackPackCheck[StatePackOffset[s.Yystate]+a] != s.Yystate {
+	if StatePackOffset[s.Yystate]+a  < 0|| StatePackOffset[s.Yystate]+a >= len(StackPackCheck) || StackPackCheck[StatePackOffset[s.Yystate]+a] != s.Yystate {
 		return 0
 	}else{
 		return StatePackAction[StatePackOffset[s.Yystate]+a]

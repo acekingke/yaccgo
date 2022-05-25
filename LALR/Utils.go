@@ -174,6 +174,11 @@ func (lalr *LALR1) ShowLookAheadSet() {
 
 // Get the error action code
 // Max State + 100 is the error
-func (lalr *LALR1) GenAcceptCode() int {
+func (lalr *LALR1) GenErrorCode() int {
 	return len(lalr.G.LR0.LR0Closure) + 100
+}
+
+// Get the accept action code
+func (lalr *LALR1) GenAcceptCode() int {
+	return len(lalr.G.LR0.LR0Closure) + 200
 }

@@ -36,7 +36,7 @@ func TestPackTable1(t *testing.T) {
 
 func TestPackTable2(t *testing.T) {
 	table := [][]int{
-		{1, 0, 0},
+		{0, 0, 1},
 		{0, 1, 0},
 		{0, 0, 1},
 	}
@@ -46,6 +46,26 @@ func TestPackTable2(t *testing.T) {
 	fmt.Println(D)
 	fmt.Println(C)
 	R := UnPackTable(3, 3, T, D, C)
+	if !reflect.DeepEqual(table, R) {
+		t.Error("PackTable2 failed")
+	}
+}
+
+func TestPackTable3(t *testing.T) {
+	table := [][]int{
+		{0, 0, 2, 0, 3},
+		{0, 206, 0, 0, 0},
+		{0, 0, 2, 0, 3},
+		{0, -2, 0, -2, 0},
+		{0, 0, 0, 5, 0},
+		{0, -1, 0, -1, 0},
+	}
+	fmt.Println(table)
+	T, D, C := PackTable(table)
+	fmt.Println(T)
+	fmt.Println(D)
+	fmt.Println(C)
+	R := UnPackTable(6, 5, T, D, C)
 	if !reflect.DeepEqual(table, R) {
 		t.Error("PackTable2 failed")
 	}

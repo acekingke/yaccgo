@@ -1,3 +1,7 @@
+/*
+Copyright (c) 2021 Ke Yuchang(aceking.ke@gmail.com). All rights reserved.
+Use of this source code is governed by MIT license that can be found in the LICENSE file.
+*/
 package utils
 
 import "sort"
@@ -34,7 +38,7 @@ func PackTable(table [][]int) ( /*T*/ []int /*D*/, []int /*Check*/, []int) {
 	//sort the count
 	sort.SliceStable(rowCount, func(i, j int) bool {
 		return rowCount[i].b.(int) > rowCount[j].b.(int)
-	})
+	}) // rowCount is equal the bucket
 	maxIndex := 0
 	// from the largest to the smallest
 	for _, p := range rowCount {
@@ -68,6 +72,17 @@ func PackTable(table [][]int) ( /*T*/ []int /*D*/, []int /*Check*/, []int) {
 			check[row[i]+k] = i
 		}
 	}
+	//Trim the zero element at the begin
+	for i := 0; i < len(ret); i++ {
+		if ret[i] != 0 {
+			break
+		}
+		ret = ret[1:]
+		check = check[1:]
+		for j := 0; j < len(row); j++ {
+			row[j]--
+		}
+	}
 	return ret, row, check
 }
 
@@ -82,7 +97,7 @@ func UnPackTable(rows int, cols int, T []int, D []int, C []int) [][]int {
 	// step 3 fill the table
 	for i := 0; i < len(D); i++ {
 		for j := 0; j < cols; j++ {
-			if D[i]+j >= len(C) || C[D[i]+j] != i {
+			if D[i]+j < 0 || D[i]+j >= len(C) || C[D[i]+j] != i {
 				table[i][j] = 0
 			} else {
 				table[i][j] = T[D[i]+j]

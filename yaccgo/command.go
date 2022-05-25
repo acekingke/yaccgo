@@ -68,6 +68,8 @@ func cmdGenerate(args []string) {
 		genCommonFunc(args[1], args[2], builder.GoGenFromString)
 	case "typescript":
 		genCommonFunc(args[1], args[2], builder.TsGenFromString)
+	case "template":
+		genCommonFunc(args[1], args[2], builder.TemplateGenFromString)
 	case "rust":
 		fmt.Println("not support rust yet")
 	}

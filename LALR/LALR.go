@@ -5,6 +5,7 @@ Use of this source code is governed by MIT license that can be found in the LICE
 package lalr
 
 import (
+	"errors"
 	"fmt"
 	"sort"
 
@@ -27,6 +28,8 @@ type LALR1 struct {
 	ActionTable []int
 	OffsetTable []int
 	CheckTable  []int
+	ActionDef   []int
+	GoToDef     []int
 }
 
 // q --t--> p
@@ -281,23 +284,93 @@ func ComputeLALR(g *grammar.Grammar) *LALR1 {
 	if tab, err := lalr.GenTable(); err != nil {
 		panic(err.Error())
 	} else {
-		lalr.GTable = tab
-		// try to pack the table
-		act, off, check := utils.PackTable(lalr.GTable)
-		lalr.NeedPacked = false
-		lalr.NumOfStates = len(lalr.G.LR0.LR0Closure)
-		if len(act)+len(off)+len(check) > lalr.NumOfStates*len(lalr.G.Symbols) {
-			if utils.DebugFlags {
-				fmt.Println("The table is no need to pack")
-			}
-		} else {
-			if utils.DebugFlags {
-				fmt.Println("The table is packed")
-			}
-			lalr.NeedPacked = true
-			lalr.ActionTable, lalr.OffsetTable, lalr.CheckTable = act, off, check
+		// try to split the table and pack it
+		if err := lalr.TrySplitTable(tab); err != nil {
+			fmt.Println(err.Error())
 		}
-
 	}
 	return lalr
 }
+
+// the table is packed
+func (lalr *LALR1) TryPackedTable(tab [][]int) error {
+	lalr.GTable = tab
+	// try to pack the table
+	act, off, check := utils.PackTable(lalr.GTable)
+	lalr.NeedPacked = false
+	lalr.NumOfStates = len(lalr.G.LR0.LR0Closure)
+	if len(act)+len(off)+len(check) > lalr.NumOfStates*len(lalr.G.Symbols) {
+		if utils.DebugFlags {
+			fmt.Println("The table is no need to pack")
+		}
+		return errors.New("the table is no need to pack")
+	} else {
+		if utils.DebugFlags {
+			fmt.Println("The table is packed")
+		}
+		lalr.NeedPacked = true
+		lalr.ActionTable, lalr.OffsetTable, lalr.CheckTable = act, off, check
+	}
+	return nil
+}
+
+// Try to split the table, and pack it
+func (lalr *LALR1) TrySplitTable(tab [][]int) error {
+	lalr.GTable = tab
+	actTab, goTab := lalr.SplitActionAndGotoTable(tab)
+	// try to pack the table
+	actdef := make([]int, len(actTab))
+	for i := range actTab {
+		actdef[i] = findMaxOccurence(actTab[i])
+		for j := range actTab[i] {
+			if actTab[i][j] == actdef[i] {
+				actTab[i][j] = 0
+			}
+		}
+	}
+
+	gtdef := make([]int, len(goTab))
+	for i := range goTab {
+		gtdef[i] = findMaxOccurence(goTab[i])
+		for j := range goTab[i] {
+			if goTab[i][j] == gtdef[i] {
+				goTab[i][j] = 0
+			}
+		}
+	}
+	// Now fix the goTab to actTab
+	for _, r := range goTab {
+		for j, v := range r {
+			actTab[j] = append(actTab[j], v)
+		}
+	}
+
+	act, off, check := utils.PackTable(actTab)
+	if len(act)+len(off)+len(actdef)+len(gtdef) > len(tab)*len(tab[0]) {
+		return errors.New("the table is no need to pack")
+	}
+
+	lalr.NeedPacked = true
+	lalr.ActionTable, lalr.OffsetTable, lalr.CheckTable = act, off, check
+	lalr.ActionDef, lalr.GoToDef = actdef, gtdef
+	return nil
+}
+
+// find the max occurance in the table.
+func findMaxOccurence(row []int) int {
+	var countmap = make(map[int]int)
+	for _, v := range row {
+		countmap[v]++
+	}
+	var max int = 0
+	var maxElem int
+	for k, v := range countmap {
+		if v > max {
+			max = v
+			maxElem = k
+		}
+	}
+	return maxElem
+}
+
+// SetDefault row and pack the table

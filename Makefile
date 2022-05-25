@@ -7,22 +7,25 @@
 grep=--include=*.go  --exclude=*.txt
 TOP = $(shell pwd)
 SRC := $(shell find $(TOP) -iname "*.go" -exec grep -L  "Copyright (c) 2021" {} \;)
+
 all: build test
 	go vet ./...
 	staticcheck ./...
 	make todo
 
-build:
+build: require
 	go fmt $(TOP)/...
 	go build -o bin/yaccgo ./yaccgo/*.go
 
-
+require:
+	@go version >/dev/null 2>&1 || { echo >&2 "go is required but not installed.  Aborting."; exit 1; }
+	@staticcheck --version >/dev/null 2>&1 || { go install honnef.co/go/tools/cmd/staticcheck@2020.2.1; }
 todo:
 	@grep -nr $(grep) ^[[:space:]]*_[[:space:]]*=[[:space:]][[:alpha:]][[:alnum:]]* * || true
 	@grep -nr $(grep) TODO * || true
 	@grep -nr $(grep) BUG * || true
 	@grep -nr $(grep) [^[:alpha:]]println * || true
-test:
+test: require
 	go test ./... -coverprofile cover.out
 	go tool cover -html=cover.out -o cover.html
 header:

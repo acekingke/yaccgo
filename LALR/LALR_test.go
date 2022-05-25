@@ -176,17 +176,16 @@ func TestLALR1_A(t *testing.T) {
 	dollar := symbol.NewSymbol(1, "$")
 	g.InsertNewSymbol(dollar)
 
-	A := symbol.NewSymbol(2, "A")
-	g.InsertNewSymbol(A)
-
-	LP := symbol.NewSymbol(3, "(")
+	LP := symbol.NewSymbol(2, "(")
 	g.InsertNewSymbol(LP)
 
-	RP := symbol.NewSymbol(4, ")")
+	RP := symbol.NewSymbol(3, ")")
 	g.InsertNewSymbol(RP)
 
-	a := symbol.NewSymbol(5, "a")
+	a := symbol.NewSymbol(4, "a")
 	g.InsertNewSymbol(a)
+	A := symbol.NewSymbol(5, "A")
+	g.InsertNewSymbol(A)
 	// 0 start -> A
 	g.InsertNewRules(rule.NewProductoinRule(g.StartSymbol,
 		[]*symbol.Symbol{
@@ -245,11 +244,22 @@ func TestLALR1_A(t *testing.T) {
 	if tab, err := lalr.GenTable(); err != nil {
 		fmt.Print(err.Error())
 	} else {
-		for _, row := range tab {
+		one, two := lalr.SplitActionAndGotoTable(tab)
+		fmt.Println(one, two)
+		fmt.Print("/*     ")
+		for _, sy := range lalr.G.Symbols {
+			fmt.Printf("%s\t", sy.Name)
+		}
+		fmt.Println("*/")
+		for index, row := range tab {
+			fmt.Printf("/* %d */ {", index)
 			for _, val := range row {
-				fmt.Printf("%d,", val)
+				fmt.Printf("%d,\t", val)
 			}
-			fmt.Println()
+			fmt.Println("},")
+		}
+		if err := lalr.TrySplitTable(tab); err != nil {
+			fmt.Print(err.Error())
 		}
 	}
 
@@ -268,21 +278,20 @@ func TestLALR1_ambiguity(t *testing.T) {
 	dollar := symbol.NewSymbol(1, "$")
 	g.InsertNewSymbol(dollar)
 
-	E := symbol.NewSymbol(2, "E")
-	g.InsertNewSymbol(E)
-
-	PLUS := symbol.NewSymbol(3, "+")
+	PLUS := symbol.NewSymbol(2, "+")
 	g.InsertNewSymbol(PLUS)
 
-	LP := symbol.NewSymbol(4, "(")
+	LP := symbol.NewSymbol(3, "(")
 	g.InsertNewSymbol(LP)
-	RP := symbol.NewSymbol(5, ")")
+	RP := symbol.NewSymbol(4, ")")
 	g.InsertNewSymbol(RP)
 
-	MULT := symbol.NewSymbol(6, "*")
+	MULT := symbol.NewSymbol(5, "*")
 	g.InsertNewSymbol(MULT)
-	I := symbol.NewSymbol(7, "i")
+	I := symbol.NewSymbol(6, "i")
 	g.InsertNewSymbol(I)
+	E := symbol.NewSymbol(7, "E")
+	g.InsertNewSymbol(E)
 	//Set preType and Prec
 	PLUS.SetPrecType(symbol.LEFT)
 	PLUS.SetPrec(0)
@@ -376,6 +385,39 @@ func TestLALR1_ambiguity(t *testing.T) {
 			fmt.Println("The table is packed")
 
 		}
+		err := lalr.TrySplitTable(tab)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+
+	}
+}
+
+func Test_findMaxOccurence(t *testing.T) {
+	type args struct {
+		row []int
+	}
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+		// TODO: Add test cases.
+		{"test1",
+			args{row: []int{107, -1, 107, -1, 107, 107, 1}},
+			107,
+		},
+		{"test2",
+			args{row: []int{0, -1, 0, -1, 0, 107, 1}},
+			0,
+		},
 	}
 
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := findMaxOccurence(tt.args.row); got != tt.want {
+				t.Errorf("findMaxOccurence() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }
