@@ -6,6 +6,7 @@ import (
 	"text/template"
 
 	parser "github.com/acekingke/yaccgo/Parser"
+	utils "github.com/acekingke/yaccgo/Utils"
 )
 
 type TemplateBuilder struct {
@@ -56,7 +57,7 @@ func NewTemplateBuilder(w *parser.Walker) *TemplateBuilder {
 }
 
 func (b *TemplateBuilder) buildConstPart() {
-	b.NeedPacked = b.vnode.NeedPacked
+	b.NeedPacked = b.vnode.NeedPacked && utils.PackFlags
 	b.NTerminals = len(b.vnode.G.VtSet)
 	b.CodeHeader = b.vnode.GetCode()
 	b.CodeLast = b.vnode.GetCodeCopy()
@@ -66,6 +67,7 @@ func (b *TemplateBuilder) buildConstPart() {
 			b.ConstPart += fmt.Sprintf("const %s = %d\n", identifier.Name, identifier.Value)
 		}
 	}
+	b.ConstPart += fmt.Sprintf("const ERROR_ACTION = %d\nconst ACCEPT_ACTION = %d\n", b.vnode.GenErrorCode(), b.vnode.GenAcceptCode())
 }
 
 func (b *TemplateBuilder) buildUionAndCode() {
@@ -177,11 +179,11 @@ func (b *TemplateBuilder) buildTranslate() {
 }
 
 func (b *TemplateBuilder) WriteFile(f *os.File) {
-	templ, err := template.ParseFiles("goCode.templ")
-	defer f.Close()
+	templ, err := template.New("gotemplate").Parse(goCodeTemplateStr)
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 	}
+	defer f.Close()
 	if err := templ.Execute(f, b); err != nil {
 		panic(err)
 	}
