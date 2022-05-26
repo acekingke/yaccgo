@@ -1,3 +1,6 @@
+package builder
+
+var goCodeTemplateStr string = `
 /*Generator Code , do not modify*/
 // Code header part 
 {{.CodeHeader}}
@@ -187,4 +190,4 @@ func TraceReduce(reduceIndex, s int, look string) {
 	}
 }
 // Code Last part
-{{.CodeLast}}
+{{.CodeLast}}`

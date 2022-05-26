@@ -65,11 +65,9 @@ type genfun func(input string, file string) error
 func cmdGenerate(args []string) {
 	switch args[0] {
 	case "go":
-		genCommonFunc(args[1], args[2], builder.GoGenFromString)
+		genCommonFunc(args[1], args[2], builder.TemplateGenFromString)
 	case "typescript":
 		genCommonFunc(args[1], args[2], builder.TsGenFromString)
-	case "template":
-		genCommonFunc(args[1], args[2], builder.TemplateGenFromString)
 	case "rust":
 		fmt.Println("not support rust yet")
 	}

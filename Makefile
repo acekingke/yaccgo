@@ -14,7 +14,13 @@ all: build test
 	make todo
 
 build: require
-	go fmt $(TOP)/...
+	rm -rf out/*.go
+	touch Builder/GoCodeTemplate.go
+	@echo "package builder\n var goCodeTemplateStr string=\`" > Builder/GoCodeTemplate.go
+	@cat  Builder/GoCodeTemplate.go Builder/goCode.templ > Builder/GoCodeTemplate.go.tmp
+	echo "\`" >> Builder/GoCodeTemplate.go.tmp
+	mv Builder/GoCodeTemplate.go.tmp Builder/GoCodeTemplate.go
+	go fmt ./...
 	go build -o bin/yaccgo ./yaccgo/*.go
 
 require:

@@ -3,9 +3,14 @@ package builder
 import (
 	"fmt"
 	"os"
+	"regexp"
+	"strconv"
+	"strings"
 	"text/template"
 
 	parser "github.com/acekingke/yaccgo/Parser"
+	rules "github.com/acekingke/yaccgo/Rules"
+	utils "github.com/acekingke/yaccgo/Utils"
 )
 
 type TemplateBuilder struct {
@@ -56,7 +61,7 @@ func NewTemplateBuilder(w *parser.Walker) *TemplateBuilder {
 }
 
 func (b *TemplateBuilder) buildConstPart() {
-	b.NeedPacked = b.vnode.NeedPacked
+	b.NeedPacked = b.vnode.NeedPacked && utils.PackFlags
 	b.NTerminals = len(b.vnode.G.VtSet)
 	b.CodeHeader = b.vnode.GetCode()
 	b.CodeLast = b.vnode.GetCodeCopy()
@@ -66,6 +71,7 @@ func (b *TemplateBuilder) buildConstPart() {
 			b.ConstPart += fmt.Sprintf("const %s = %d\n", identifier.Name, identifier.Value)
 		}
 	}
+	b.ConstPart += fmt.Sprintf("const ERROR_ACTION = %d\nconst ACCEPT_ACTION = %d\n", b.vnode.GenErrorCode(), b.vnode.GenAcceptCode())
 }
 
 func (b *TemplateBuilder) buildUionAndCode() {
@@ -177,12 +183,40 @@ func (b *TemplateBuilder) buildTranslate() {
 }
 
 func (b *TemplateBuilder) WriteFile(f *os.File) {
-	templ, err := template.ParseFiles("goCode.templ")
-	defer f.Close()
+	templ, err := template.New("gotemplate").Parse(goCodeTemplateStr)
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 	}
+	defer f.Close()
 	if err := templ.Execute(f, b); err != nil {
 		panic(err)
 	}
+}
+
+func actionCodeReplace(vnode *parser.RootVistor,
+	index int, pr *rules.ProductoinRule) string {
+	oneRule := vnode.GetRules(index - 1)
+	//  generate the comments.
+	strComment := "\n/*\n%s*/\n"
+	leftPartString := fmt.Sprint("\nLineNo:", oneRule.LineNo, "\n") + parser.RemoveTempName(oneRule.LeftPart.Name)
+	var rightPartString string = ""
+	for _, rightPart := range oneRule.RighPart {
+		rightPartString += parser.RemoveTempName(rightPart.Name) + " "
+	}
+	strComment = fmt.Sprintf(strComment,
+		fmt.Sprintf("%s -> %s\n %s\n",
+			leftPartString, rightPartString, oneRule.ActionCode))
+
+	str := oneRule.ActionCode
+	str = strings.ReplaceAll(str, "$$",
+		fmt.Sprintf("dollarDolar.%s", pr.LeftPart.Tag))
+
+	// find the $ and digits
+	reg := regexp.MustCompile(`\$[0-9]+`)
+	str = reg.ReplaceAllStringFunc(str, func(s string) string {
+		index := s[1:]
+		i, _ := strconv.Atoi(index)
+		return fmt.Sprintf("Dollar[%s].%s", index, pr.RighPart[i-1].Tag)
+	})
+	return strComment + str + "\n"
 }
