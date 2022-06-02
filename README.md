@@ -10,7 +10,7 @@ https://github.com/golang/vscode-go/issues/1674#event-5612030543
 
 I tried to modify the codes, It is not good readable, and I have no patient to do it, So I write a **YaccGo**
 
-YaccGo is an unstantable and debugable Yacc in Go. . It is written in Go and generates parsers written in Go ,typescript, rust ...
+YaccGo is an understandable and debugable Yacc in Go. . It is written in Go and generates parsers written in Go ,typescript, rust ...
 
 # Quick Start
 clone the code
