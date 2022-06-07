@@ -80,7 +80,3 @@ E:
 		}
 	}
 
-func main() {
-	v := Parser("1+2*31").val
-	fmt.Println(v)
-}

@@ -15,7 +15,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var unpack bool
+var unpack, httpDebug bool
 var rootCmd = &cobra.Command{
 	Use:   "yaccgo",
 	Short: "yaccgo is a yacc generator",
@@ -40,10 +40,12 @@ func init() {
 				cmd.Help()
 			}
 			utils.PackFlags = !unpack
+			utils.HttpDebug = httpDebug
 			cmdGenerate(args)
 		},
 	}
 	c.Flags().BoolVarP(&unpack, "unpack", "u", false, "useage package")
+	c.Flags().BoolVarP(&httpDebug, "httpdebug", "d", false, "debug use http server")
 	rootCmd.AddCommand(c)
 	debugCmd := &cobra.Command{
 		Use:   "debug input.y",

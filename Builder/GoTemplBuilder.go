@@ -16,6 +16,7 @@ import (
 type TemplateBuilder struct {
 	vnode          *parser.RootVistor
 	NeedPacked     bool
+	HttpParser     bool
 	NTerminals     int
 	HeaderPart     string
 	CodeHeader     string
@@ -62,6 +63,7 @@ func NewTemplateBuilder(w *parser.Walker) *TemplateBuilder {
 
 func (b *TemplateBuilder) buildConstPart() {
 	b.NeedPacked = b.vnode.NeedPacked && utils.PackFlags
+	b.HttpParser = utils.HttpDebug
 	b.NTerminals = len(b.vnode.G.VtSet)
 	b.CodeHeader = b.vnode.GetCode()
 	b.CodeLast = b.vnode.GetCodeCopy()

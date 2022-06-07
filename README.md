@@ -52,6 +52,19 @@ look ahead $, use Reduce:PROG -> PROG E NL , go to state 1
 Shift PROG, push state 1
 0
 ```
+# Web Debuger
+If you want to debug the parser visually, you can use yaccgo debuger in browser.
+![debuger](debugtool.gif)
+## 1. generate http debuger parser
+```
+./bin/yaccgo generate go --httpdebug=true examples/exprhttp.y out/expr.go
+```
+## 2. run http debuger
+```
+go run out/expr.go
+
+```
+## 3. open the `debugTool.html` in browser
 
 # Design
 

@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>YaccGo</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="stylesheet/custome.css">
+  </head>
+  <body>
+    <div class="container">
+      <h1>Debuger YaccGo</h1>
+      <p>Show the stack for every steps!</p>
+      <div class="row">
+        <div class="col">
+          <div class="panel panel-blue">
+            <div class="form-group">
+             <label for="name">input the strings :</label>
+              <input class="input-sm form-control" id="item-87" placeholder="Enter your string to parse">
+              <small id="rest" class="form-text text-muted">after input, you can run the parser step by step.</small>
+            </div>
+            <button type="submit" class="btn btn-primary" id="buttonSubmit">Step Run</button>
+            
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <div class="panel panel-purple">States Stack
+            <ul class="list-group" id="list1">
+            </ul>
+          </div>
+        </div>
+         <div class="col">
+           <div class="panel panel-purple">Symbols Stack
+            <ul class="list-group" id="list2">
+            </ul>
+           </div>
+         </div>
+         <div class="col">
+          <div class="panel panel-purple"> Values Stack
+            <ul class="list-group" id="list3">
+            </ul>
+          </div>
+        </div>
+      </div>
+  
+    </div>
+    
+    <script
+    src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+    crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+    <script> 
+      $(document).ready(function(){
+        $("#buttonSubmit").click(function(){
+          txt=$("#item-87").val();
+          $.post("http://localhost:8080/ping",
+          JSON.stringify({input:txt}), 
+          function(result){
+            console.log(result);
+            $("#list1").empty();
+            $("#list2").empty();
+            $("#list3").empty();
+            for(i=0;i<result.states.length;i++){
+              $("#list1").append("<li class='list-group-item'>"+result.states[i]+"</li>");
+            }
+            for(i=0;i<result.symbols.length;i++){
+              $("#list2").append("<li class='list-group-item'>"+result.symbols[i]+"</li>");
+            }
+            for(i=0;i<result.values.length;i++){
+              $("#list3").append("<li class='list-group-item'>"+result.values[i]+"</li>");
+            }
+            $("#rest").text(result.rest);
+          },"json",
+          function(error){
+            console.log(error);
+          });
+
+        });
+      });
+      </script>
+  </body>
+</html>

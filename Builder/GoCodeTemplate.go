@@ -5,6 +5,14 @@ var goCodeTemplateStr string = `
 // Code header part 
 {{.CodeHeader}}
 import 	"strings"
+{{if .HttpParser}}
+import(
+	"io/ioutil"
+	"net/http"
+	"time"
+	"encoding/json"
+)
+{{end}}
 // const part
 {{.ConstPart}}
 {{ if .NeedPacked }}
@@ -135,6 +143,9 @@ func Parser(input string) *ValType {
 		}
 		s := &StateSymStack[StackPointer-1]
 		a := s.Action(lookAhead)
+		{{ if .HttpParser }}
+		TracePingFun(input[currentPos:])
+		{{ end }}
 		if a == ERROR_ACTION {
 			lines := strings.Split(input[:currentPos], "\n")
 			panic("Grammar parse error near :" + lines[len(lines)-1])
@@ -173,6 +184,7 @@ func translate(c int) int {
 	}
 	return conv
 }
+
 // Trace function for translate
 func TraceTranslate(c int) string {
 	var conv string = ""
@@ -189,5 +201,76 @@ func TraceReduce(reduceIndex, s int, look string) {
 		}
 	}
 }
+{{if .HttpParser}}
+// Trace function for Ping
+func TracePingFun(rest string) {
+	var result map[string]interface{} = make(map[string]interface{})
+	var stateStack []string
+	var symStack []string
+	var valueStack []string
+	for i := 0; i < StackPointer; i++ {
+		v := StateSymStack[i]
+		stateStack = append(stateStack, fmt.Sprintf("%d", v.Yystate))
+		symStack = append(symStack, TraceTranslate(v.YySymIndex))
+		valueStack = append(valueStack, fmt.Sprintf("%v", v.ValType.val))
+	}
+	result["states"] = stateStack
+	result["symbols"] = symStack
+	result["values"] = valueStack
+	result["rest"] = rest
+
+	js, _ := json.Marshal(result)
+	ochan <- string(js)
+	<-schan
+}
+
+type PingType struct {
+	Input string` + "`" + `json:"input"` + "`" + `
+}
+
+var schan chan string = make(chan string)
+var ochan chan string = make(chan string)
+var finished bool = true
+
+// Ping Function
+func handlerPing(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	if finished {
+		go ParserFun()
+	}
+	reqBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		fmt.Fprintf(w, "Kindly enter data with the event title and description only in order to update")
+	}
+	var ping PingType
+
+	json.Unmarshal(reqBody, &ping)
+	fmt.Println(ping.Input)
+	schan <- ping.Input
+	w.Write([]byte(<-ochan))
+	fmt.Println(time.Now(), r.Method, r.RequestURI, r.UserAgent())
+}
+
+func ParserFun() {
+	finished = false
+	ParserInit()
+	input := <-schan
+	_ = Parser(input)
+	finished = true
+}
+
+func main() {
+	http.HandleFunc("/ping", handlerPing)
+
+	fmt.Println("ping listening on 0.0.0.0, port 8080")
+	err := http.ListenAndServe(":8080", nil)
+
+	if err != nil {
+		fmt.Println("Error starting ping server: ", err)
+	}
+}
+
+{{end}}
 // Code Last part
 {{.CodeLast}}`

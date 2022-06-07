@@ -6,3 +6,4 @@ package utils
 
 var DebugFlags bool = false
 var PackFlags bool = true
+var HttpDebug bool = false
