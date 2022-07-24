@@ -5,6 +5,8 @@ Use of this source code is governed by MIT license that can be found in the LICE
 package parser
 
 import (
+	"fmt"
+
 	grammar "github.com/acekingke/yaccgo/Grammar"
 	item "github.com/acekingke/yaccgo/Items"
 	lalr "github.com/acekingke/yaccgo/LALR"
@@ -99,6 +101,10 @@ func (v *astDeclareVistor) Process(node *Node) {
 		for _, predefSlice := range n.PrecDefList {
 			v.precIndex++
 			for _, predef := range predefSlice {
+				if v.idsymtabl[predef.IdName] == nil {
+					errStr := fmt.Sprintf("prec symbol %s not found, please check token is exist", predef.IdName)
+					panic(errStr)
+				}
 				v.preIdList = append(v.preIdList, precId{
 					Prec:      v.precIndex,
 					AssocType: predef.AssocType,

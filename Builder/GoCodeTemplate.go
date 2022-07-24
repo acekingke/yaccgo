@@ -147,8 +147,7 @@ func Parser(input string) *ValType {
 		TracePingFun(input[currentPos:])
 		{{ end }}
 		if a == ERROR_ACTION {
-			lines := strings.Split(input[:currentPos], "\n")
-			panic("Grammar parse error near :" + lines[len(lines)-1])
+			panic(fmt.Sprintf("Grammar error near pos %d", currentPos) + ":" + TraceTranslate(lookAhead))
 		} else if a == ACCEPT_ACTION {
 			return &s.ValType
 		} else {

@@ -61,7 +61,14 @@ func (lalr *LALR1) ResolveConflict(act01, act02 *Action) (*Action, error) {
 		return act_first, nil
 	} else if act_first.Prec == act_second.Prec {
 		if act_first.PrecType == symbol.NONE || act_second.PrecType == symbol.NONE {
-			return nil, fmt.Errorf("cannot resolve conflict")
+			actionError := &Action{
+				Sym:         act_first.Sym,
+				ActionType:  ERROR,
+				ActionIndex: 0,
+				PrecType:    symbol.NONE,
+				Prec:        act_first.Prec,
+			}
+			return actionError, nil
 		}
 		if act_first.PrecType == symbol.LEFT {
 			return act_first, nil
@@ -160,10 +167,14 @@ func (lalr *LALR1) GenTable() ([][]int, error) {
 				row[i] = lalr.GenErrorCode()
 			}
 			for syInd, act := range set {
-				if act[0].ActionIndex != 0 {
-					row[syInd] = act[0].ActionIndex
+				if act[0].ActionType != ERROR {
+					if act[0].ActionIndex != 0 {
+						row[syInd] = act[0].ActionIndex
+					} else {
+						row[syInd] = lalr.GenAcceptCode()
+					}
 				} else {
-					row[syInd] = lalr.GenAcceptCode()
+					fmt.Println("it is nonassoc?")
 				}
 			}
 			tableGen = append(tableGen, row)

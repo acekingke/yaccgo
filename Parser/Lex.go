@@ -280,6 +280,9 @@ func DirectiveOtherState(l *lexer) stateFn {
 	if l.acceptWord("right") {
 		l.emit(RightAssoc)
 	}
+	if l.acceptWord("nonassoc") {
+		l.emit(NoneAssoc)
+	}
 	if l.acceptWord("prec") {
 		l.emit(PrecDirective)
 	}

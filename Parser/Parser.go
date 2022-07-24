@@ -378,6 +378,7 @@ func (p *parser) parseDeclare() Node {
 		// Prec
 		if p.current.Is(LeftAssoc) ||
 			p.current.Is(RightAssoc) ||
+			p.current.Is(NoneAssoc) ||
 			// precDirective is just used to rules
 			p.current.Is(Precedence) {
 			PreDefList = append(PreDefList, p.parsePrecList())
