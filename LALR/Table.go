@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	symbol "github.com/acekingke/yaccgo/Symbol"
+	utils "github.com/acekingke/yaccgo/Utils"
 )
 
 type E_ActionType int
@@ -174,7 +175,10 @@ func (lalr *LALR1) GenTable() ([][]int, error) {
 						row[syInd] = lalr.GenAcceptCode()
 					}
 				} else {
-					fmt.Println("it is nonassoc?")
+					if utils.DebugFlags {
+						fmt.Println("it is nonassoc, should error")
+					}
+
 				}
 			}
 			tableGen = append(tableGen, row)
