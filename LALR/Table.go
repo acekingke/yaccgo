@@ -201,7 +201,7 @@ func (lalr *LALR1) SplitActionAndGotoTable(tab [][]int) ([][]int, [][]int) {
 	// goto table , make row index is symbol ,column index is state.
 	gotoTable := [][]int{}
 	//skip start symbol
-	for i := 0; i < nNonTerminals-1; i++ {
+	for i := 0; i < nNonTerminals; i++ {
 		row := make([]int, len(tab))
 		for j := 0; j < len(row); j++ {
 			row[j] = tab[j][nTerminals+i+1]
