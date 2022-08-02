@@ -189,7 +189,7 @@ func (lalr *LALR1) GenTable() ([][]int, error) {
 
 func (lalr *LALR1) SplitActionAndGotoTable(tab [][]int) ([][]int, [][]int) {
 	nTerminals := len(lalr.G.VtSet)
-	nNonTerminals := len(lalr.G.VnSet)
+	nNonTerminals := len(lalr.G.VnSet) - 1 // skip the start symbol
 	fmt.Println("nTerminals", nTerminals, "nNonTerminals", nNonTerminals)
 	actionTable := [][]int{}
 	for i := 0; i < len(tab); i++ {
@@ -204,12 +204,11 @@ func (lalr *LALR1) SplitActionAndGotoTable(tab [][]int) ([][]int, [][]int) {
 	for i := 0; i < nNonTerminals; i++ {
 		row := make([]int, len(tab))
 		for j := 0; j < len(row); j++ {
-			row[j] = tab[j][nTerminals+i+1]
+			row[j] = tab[j][nTerminals+i+1] // 1 is the start symbol
 		}
 		gotoTable = append(gotoTable, row)
 	}
 	return actionTable, gotoTable
-
 }
 
 func getActionTypeName(act E_ActionType) string {

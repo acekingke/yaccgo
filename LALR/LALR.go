@@ -285,6 +285,20 @@ func ComputeLALR(g *grammar.Grammar) *LALR1 {
 		panic(err.Error())
 	} else {
 		// try to split the table and pack it
+		if utils.DebugPackTab {
+			fmt.Print("/*     ")
+			for _, sy := range lalr.G.Symbols {
+				fmt.Printf("%s\t", sy.Name)
+			}
+			fmt.Println("*/")
+			for index, row := range tab {
+				fmt.Printf("/* %d */ {", index)
+				for _, val := range row {
+					fmt.Printf("%d,\t", val)
+				}
+				fmt.Println("},")
+			}
+		}
 		if err := lalr.TrySplitTable(tab); err != nil {
 			fmt.Println(err.Error())
 		}
@@ -320,6 +334,7 @@ func (lalr *LALR1) TrySplitTable(tab [][]int) error {
 	actTab, goTab := lalr.SplitActionAndGotoTable(tab)
 	// try to pack the table
 	actdef := make([]int, len(actTab))
+
 	for i := range actTab {
 		actdef[i] = findMaxOccurence(actTab[i])
 		for j := range actTab[i] {
@@ -344,7 +359,21 @@ func (lalr *LALR1) TrySplitTable(tab [][]int) error {
 			actTab[j] = append(actTab[j], v)
 		}
 	}
+	if utils.DebugPackTab {
+		fmt.Println("==========Show Action Table===============")
+		for i, r := range actTab {
+			fmt.Printf("%d:%v\n", i, r)
+		}
+		fmt.Println("==========Show Action def===============")
+		for i, r := range actdef {
+			fmt.Printf("%d:%v\n", i, r)
+		}
+		fmt.Println("==========Show Goto Table===============")
+		for i, r := range gtdef {
+			fmt.Printf("%d:%v\n", i, r)
+		}
 
+	}
 	act, off, check := utils.PackTable(actTab)
 	if len(act)+len(off)+len(actdef)+len(gtdef) > len(tab)*len(tab[0]) {
 		return errors.New("the table is no need to pack")
@@ -353,6 +382,31 @@ func (lalr *LALR1) TrySplitTable(tab [][]int) error {
 	lalr.NeedPacked = true
 	lalr.ActionTable, lalr.OffsetTable, lalr.CheckTable = act, off, check
 	lalr.ActionDef, lalr.GoToDef = actdef, gtdef
+	if utils.DebugPackTab {
+		// Check the packed table is correct
+		res := 0
+		nTerminals := len(lalr.G.VtSet)
+		//nNonTerminals := len(lalr.G.VnSet) - 1 // skip the start symbol
+		for state, v := range tab {
+			for lookahead, val := range v {
+				if off[state]+lookahead < 0 {
+					res = lalr.GenErrorCode()
+				} else if off[state]+lookahead >= len(check) ||
+					check[off[state]+lookahead] != state {
+					if lookahead > nTerminals {
+						res = gtdef[lookahead-nTerminals-1]
+					} else {
+						res = actdef[state]
+					}
+				} else {
+					res = act[off[state]+lookahead]
+				}
+				if res != val {
+					panic(fmt.Sprintf("state:%d, lookahead:%d, the packed table is not correct", state, lookahead))
+				}
+			}
+		}
+	}
 	return nil
 }
 

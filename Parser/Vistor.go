@@ -309,6 +309,14 @@ func (w *Walker) BuildLALR1() *lalr.LALR1 {
 
 		}
 		// resolve symbol
+		// check the nonTerminal symbol is at left side
+		for _, sym := range g.Symbols {
+			if sym.IsNonTerminator {
+				if _, ok := g.VnSet[sym]; !ok {
+					panic(fmt.Sprintf("Check the nonterminal %s in left part of rules", sym.Name))
+				}
+			}
+		}
 		g.ResolveSymbols()
 		g.CalculateEpsilonClosure()
 		item_var := item.NewItem(0, 0)
