@@ -7,4 +7,4 @@ package utils
 var DebugFlags bool = false
 var PackFlags bool = true
 var HttpDebug bool = false
-var DebugPackTab bool = true
+var DebugPackTab bool = false
