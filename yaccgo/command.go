@@ -15,7 +15,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var unpack, httpDebug bool
+var unpack, httpDebug, useObject bool
 var rootCmd = &cobra.Command{
 	Use:   "yaccgo",
 	Short: "yaccgo is a yacc generator",
@@ -25,14 +25,13 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	c := &cobra.Command{
-		Use:   "generate [flags]",
-		Short: "generate filetype input.y output.go",
-		Long: `
-		"generate filetype input.y output.go
-		filetype can be go/js/rust:
-			go : generate go code",
-			typescript : generate typescript code",
-			rust : generate rust code",
+		Use:   "generate [flags] filetype input.y output.go",
+		Short: "generate [flags] filetype",
+		Long: `generate filetype option input.y output.go
+filetype can be go/js/rust:
+	go : generate go code,
+	typescript : generate typescript code,
+	rust : generate rust code,
 		`,
 
 		Run: func(cmd *cobra.Command, args []string) {
@@ -41,11 +40,14 @@ func init() {
 			}
 			utils.PackFlags = !unpack
 			utils.HttpDebug = httpDebug
+			utils.ObjectMode = useObject
 			cmdGenerate(args)
 		},
 	}
 	c.Flags().BoolVarP(&unpack, "unpack", "u", false, "useage package")
 	c.Flags().BoolVarP(&httpDebug, "httpdebug", "d", false, "debug use http server")
+	c.Flags().BoolVarP(&useObject, "object", "o", false, "generate oop code")
+
 	rootCmd.AddCommand(c)
 	debugCmd := &cobra.Command{
 		Use:   "debug input.y",

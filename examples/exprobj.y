@@ -89,6 +89,8 @@ func GetToken(input string, valTy *ValType, pos *int) int {
 }
 
 func main() {
-	v := Parser("1+2*31>2").val
+	c := MakeParserContext()
+
+	v := c.Parser("1+2*31>2").val
 	fmt.Println(v)
 }

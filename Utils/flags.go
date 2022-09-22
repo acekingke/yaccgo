@@ -8,3 +8,4 @@ var DebugFlags bool = false
 var PackFlags bool = true
 var HttpDebug bool = false
 var DebugPackTab bool = false
+var ObjectMode bool = false

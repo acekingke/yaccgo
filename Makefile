@@ -20,6 +20,11 @@ build: require
 	@cat  Builder/GoCodeTemplate.go Builder/goCode.templ > Builder/GoCodeTemplate.go.tmp
 	echo "\`" >> Builder/GoCodeTemplate.go.tmp
 	mv Builder/GoCodeTemplate.go.tmp Builder/GoCodeTemplate.go
+	touch Builder/GoObjectTemplate.go
+	@echo "package builder\n var goObjectTemplateStr string=\`" > Builder/GoObjectTemplate.go
+	@cat  Builder/GoObjectTemplate.go Builder/goObject.templ > Builder/GoObjectTemplate.go.tmp
+	echo "\`" >> Builder/GoObjectTemplate.go.tmp
+	mv Builder/GoObjectTemplate.go.tmp Builder/GoObjectTemplate.go
 	go fmt ./...
 	go build -o bin/yaccgo ./yaccgo/*.go
 

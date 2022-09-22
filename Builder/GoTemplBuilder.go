@@ -13,6 +13,7 @@ import (
 	utils "github.com/acekingke/yaccgo/Utils"
 )
 
+// TODO: add the class model, not use global variables.
 type TemplateBuilder struct {
 	vnode          *parser.RootVistor
 	NeedPacked     bool
@@ -141,16 +142,24 @@ func (b *TemplateBuilder) buildStateFunc() {
 }
 
 func (b *TemplateBuilder) buildReduceFunc() {
+	chooseStack := "StateSymStack"
+	chooseStackPos := "StackPointer"
+	pre := ""
+	if utils.ObjectMode {
+		chooseStack = "c.StackSym"
+		chooseStackPos = "c.Stackpos"
+		pre = "c."
+	}
 	caseCode := ""
 	for i := 1; i < len(b.vnode.G.ProductoinRules); i++ {
 		productionRule := b.vnode.G.ProductoinRules[i]
 		caseCode += fmt.Sprintf("case %d: \n", i)
 		rightPartlen := len(productionRule.RighPart)
 		caseCode += fmt.Sprintf("\tdollarDolar.YySymIndex = %d\n", productionRule.LeftPart.ID)
-		caseCode += fmt.Sprintf("\tDollar := StateSymStack[topIndex-%d : StackPointer]\n\t_ = Dollar\n", rightPartlen)
+		caseCode += fmt.Sprintf("\tDollar := "+chooseStack+"[topIndex-%d : "+chooseStackPos+"]\n\t_ = Dollar\n", rightPartlen)
 		//fetch the action code here
 		caseCode += actionCodeReplace(b.vnode, i, productionRule)
-		caseCode += fmt.Sprintf("\tPopStateSym(%d)\n", rightPartlen)
+		caseCode += fmt.Sprintf("\t"+pre+"PopStateSym(%d)\n", rightPartlen)
 	}
 	b.ReduceFunc = caseCode
 }
@@ -185,7 +194,11 @@ func (b *TemplateBuilder) buildTranslate() {
 }
 
 func (b *TemplateBuilder) WriteFile(f *os.File) {
-	templ, err := template.New("gotemplate").Parse(goCodeTemplateStr)
+	chooseTemplate := goCodeTemplateStr
+	if utils.ObjectMode {
+		chooseTemplate = goObjectTemplateStr
+	}
+	templ, err := template.New("gotemplate").Parse(chooseTemplate)
 	if err != nil {
 		panic(err)
 	}
