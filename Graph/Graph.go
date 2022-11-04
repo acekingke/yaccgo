@@ -61,7 +61,7 @@ func SaveGraph(path string, graph *gographviz.Graph) error {
 	}
 	defer file.Close()
 	output := graph.String()
-	//fmt.Println(output)
+	fmt.Println(output)
 	cmd := exec.Command("dot", "-Tpng")
 	cmd.Stdin = strings.NewReader(output)
 	cmd.Stdout = file
