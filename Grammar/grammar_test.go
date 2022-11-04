@@ -68,6 +68,7 @@ func TestGrammar_GenStartSymbol(t *testing.T) {
 	}
 	fmt.Println("................")
 	item_var := item.NewItem(0, 0)
+	fmt.Println(g.ItemToStr(item_var))
 	Icloures := item.NewItemCloure()
 	Icloures.InsertItem(item_var)
 	g.ComputeIClosure(Icloures)

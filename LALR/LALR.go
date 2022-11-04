@@ -10,6 +10,7 @@ import (
 	"sort"
 
 	grammar "github.com/acekingke/yaccgo/Grammar"
+	graph "github.com/acekingke/yaccgo/Graph"
 
 	utils "github.com/acekingke/yaccgo/Utils"
 )
@@ -284,6 +285,13 @@ func ComputeLALR(g *grammar.Grammar) *LALR1 {
 	if tab, err := lalr.GenTable(); err != nil {
 		panic(err.Error())
 	} else {
+
+		if utils.GenDotGraph {
+			fmt.Println("=======now generate dot graph=====")
+			g := lalr.DrawGrammar(tab)
+			graph.SaveGraph(utils.GenDotPath, g)
+
+		}
 		// try to split the table and pack it
 		if utils.DebugPackTab {
 			fmt.Print("/*     ")

@@ -88,8 +88,16 @@ https://www.youtube.com/watch?v=HxaD_trXwRE
 
 2. DotGraph
 
-   will support Dot Graph by svg
-
+   surpose your machine has got `dot` , or you can install it from https://graphviz.org/download/
+   
+   if you want to see the LALR DFA(deterministic finite automata) diagram. use the `-g` or `--dotg=`
+   
+   for example:
+   ```shell
+   bin/yaccgo generate go -g./expr.png -o ./examples/exprobj.y ./out/exprobj.go
+   ```
+ you can see the diagram as follow:
+ ![DFA](expr.png)
 ### Project use yaccgo
 
 see [wiki](https://github.com/acekingke/yaccgo/wiki/Project-use-yaccgo)
@@ -102,12 +110,15 @@ Welcome to contributing, We appreciate your help! please make sure
 * codes should has test 
 
 # ChangeLogs
+
 2022.5.30
 1. Optimize the packtable use action default values and goto default values
 2. use the template to generate the Code 
 3. reserve the old codes but it will deprecate them in future
 2022.9.22
 1. add the oop code generator
+2022.11.4
+1. support dot graphviz
 ## License
 
 

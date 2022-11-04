@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	grammar "github.com/acekingke/yaccgo/Grammar"
+	graph "github.com/acekingke/yaccgo/Graph"
 	item "github.com/acekingke/yaccgo/Items"
 	rule "github.com/acekingke/yaccgo/Rules"
 	symbol "github.com/acekingke/yaccgo/Symbol"
@@ -324,6 +325,10 @@ func TestLALR1_ambiguity(t *testing.T) {
 	Icloures := item.NewItemCloure()
 	Icloures.InsertItem(item_var)
 	g.ComputeIClosure(Icloures)
+	// node1 := g.StateGraphNode(Icloures)
+	// graphInst := graph.NewGraph()
+	// graphInst = node1.GenDotGraph(graphInst)
+	// graph.SaveGraph("./node1.png", graphInst)
 	g.LR0.InsertItemClosure(Icloures, true)
 	g.ComputeGotoItemRecursive(Icloures)
 	g.Show()
@@ -366,6 +371,8 @@ func TestLALR1_ambiguity(t *testing.T) {
 	if tab, err := lalr.GenTable(); err != nil {
 		fmt.Print(err.Error())
 	} else {
+		graphInst := lalr.DrawGrammar(tab)
+		graph.SaveGraph("./grammar.png", graphInst)
 		fmt.Print("/*     ")
 		for _, sy := range lalr.G.Symbols {
 			fmt.Printf("%s\t", sy.Name)

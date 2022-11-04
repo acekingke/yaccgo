@@ -16,6 +16,7 @@ import (
 )
 
 var unpack, httpDebug, useObject bool
+var dotgraph string
 var rootCmd = &cobra.Command{
 	Use:   "yaccgo",
 	Short: "yaccgo is a yacc generator",
@@ -41,13 +42,17 @@ filetype can be go/js/rust:
 			utils.PackFlags = !unpack
 			utils.HttpDebug = httpDebug
 			utils.ObjectMode = useObject
+			if len(dotgraph) != 0 {
+				utils.GenDotGraph = true
+				utils.GenDotPath = dotgraph
+			}
 			cmdGenerate(args)
 		},
 	}
 	c.Flags().BoolVarP(&unpack, "unpack", "u", false, "useage package")
 	c.Flags().BoolVarP(&httpDebug, "httpdebug", "d", false, "debug use http server")
 	c.Flags().BoolVarP(&useObject, "object", "o", false, "generate oop code")
-
+	c.Flags().StringVarP(&dotgraph, "dotg", "g", "", "generate the dot graph")
 	rootCmd.AddCommand(c)
 	debugCmd := &cobra.Command{
 		Use:   "debug input.y",
