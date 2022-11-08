@@ -6,17 +6,14 @@ package graph
 
 import (
 	"fmt"
-	"os"
-	"os/exec"
-	"strings"
 	"testing"
 
 	"github.com/awalterschulze/gographviz"
 )
 
-func TestDrawSimple(t *testing.T) {
-	DrawSimple()
-}
+// func TestDrawSimple(t *testing.T) {
+// 	DrawSimple()
+// }
 
 func TestGraghNode_GenDotGraph(t *testing.T) {
 	graphAst, _ := gographviz.ParseString(`digraph G {}`)
@@ -42,19 +39,20 @@ func TestGraghNode_GenDotGraph(t *testing.T) {
 	graph = node.GenDotGraph(graph)
 	graph = AddEdge(graph, 1, 2, "E")
 	output := graph.String()
-	file, err := os.Create("./one.png")
-	if err != nil {
-		fmt.Printf("err %s\n", err.Error())
-	}
-	cmd := exec.Command("dot", "-Tpng")
-	cmd.Stdin = strings.NewReader(output)
-	cmd.Stdout = file
-	cmd.Stderr = os.Stderr
-	if err := cmd.Start(); err != nil {
-		panic(err)
-	}
-	cmd.Wait()
-	if err := file.Close(); err != nil {
-		fmt.Printf("err %s\n", err.Error())
-	}
+	fmt.Println(output)
+	// file, err := os.Create("./one.png")
+	// if err != nil {
+	// 	fmt.Printf("err %s\n", err.Error())
+	// }
+	// cmd := exec.Command("dot", "-Tpng")
+	// cmd.Stdin = strings.NewReader(output)
+	// cmd.Stdout = file
+	// cmd.Stderr = os.Stderr
+	// if err := cmd.Start(); err != nil {
+	// 	panic(err)
+	// }
+	// cmd.Wait()
+	// if err := file.Close(); err != nil {
+	// 	fmt.Printf("err %s\n", err.Error())
+	// }
 }

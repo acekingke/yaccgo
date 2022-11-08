@@ -81,6 +81,7 @@ func DrawSimple() {
 	})
 	graphInst.AddNode("G", "b", nil)
 	graphInst.AddEdge("a", "b", true, nil)
-	SaveGraph("./one.png", graphInst)
+	//SaveGraph("./one.png", graphInst)
+	fmt.Println(graphInst.String())
 
 }

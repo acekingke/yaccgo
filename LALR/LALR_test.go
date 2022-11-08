@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	grammar "github.com/acekingke/yaccgo/Grammar"
-	graph "github.com/acekingke/yaccgo/Graph"
 	item "github.com/acekingke/yaccgo/Items"
 	rule "github.com/acekingke/yaccgo/Rules"
 	symbol "github.com/acekingke/yaccgo/Symbol"
@@ -372,7 +371,8 @@ func TestLALR1_ambiguity(t *testing.T) {
 		fmt.Print(err.Error())
 	} else {
 		graphInst := lalr.DrawGrammar(tab)
-		graph.SaveGraph("./grammar.png", graphInst)
+		//graph.SaveGraph("./grammar.png", graphInst)
+		fmt.Println(graphInst.String())
 		fmt.Print("/*     ")
 		for _, sy := range lalr.G.Symbols {
 			fmt.Printf("%s\t", sy.Name)
