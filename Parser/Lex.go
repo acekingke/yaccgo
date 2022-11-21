@@ -239,9 +239,9 @@ func ActionState(l *lexer) stateFn {
 	case unicode.IsDigit(r):
 		l.acceptRun("0123456789")
 		l.emit(ActionN)
-	case l.acceptWord("accept"): //$accept
+	case l.acceptOnlyAlphaWord("accept"): //$accept
 		l.emit(ActionAccept)
-	case l.acceptWord("end"): //$end
+	case l.acceptOnlyAlphaWord("end"): //$end
 		l.emit(ActionEnd)
 	default:
 		l.error("Action lexer error")
@@ -265,31 +265,31 @@ func DirectiveState(l *lexer) stateFn {
 }
 
 func DirectiveOtherState(l *lexer) stateFn {
-	if l.acceptWord("type") {
+	if l.acceptOnlyAlphaWord("type") {
 		l.emit(TypeDirective)
 	}
-	if l.acceptWord("token") {
+	if l.acceptOnlyAlphaWord("token") {
 		l.emit(TokenDirective)
 	}
-	if l.acceptWord("union") {
+	if l.acceptOnlyAlphaWord("union") {
 		return DirectiveUnionState
 	}
-	if l.acceptWord("left") {
+	if l.acceptOnlyAlphaWord("left") {
 		l.emit(LeftAssoc)
 	}
-	if l.acceptWord("right") {
+	if l.acceptOnlyAlphaWord("right") {
 		l.emit(RightAssoc)
 	}
-	if l.acceptWord("nonassoc") {
+	if l.acceptOnlyAlphaWord("nonassoc") {
 		l.emit(NoneAssoc)
 	}
-	if l.acceptWord("prec") {
+	if l.acceptOnlyAlphaWord("prec") {
 		l.emit(PrecDirective)
 	}
-	if l.acceptWord("precedence") {
+	if l.acceptOnlyAlphaWord("precedence") {
 		l.emit(Precedence)
 	}
-	if l.acceptWord("start") {
+	if l.acceptOnlyAlphaWord("start") {
 		l.emit(StartDirective)
 	}
 	return rootState
@@ -453,6 +453,29 @@ func (l *lexer) acceptRun(valid string) {
 	for strings.ContainsRune(valid, l.next()) {
 	}
 	l.backup()
+}
+
+func (l *lexer) acceptOnlyAlphaWord(word string) bool {
+	pos, loc, prev := l.end, l.loc, l.prev
+
+	// Skip spaces (U+0020) if any
+	r := l.peek()
+	for ; r == ' '; r = l.peek() {
+		l.next()
+	}
+
+	for _, ch := range word {
+		if l.next() != ch {
+			l.end, l.loc, l.prev = pos, loc, prev
+			return false
+		}
+	}
+	if r = l.peek(); unicode.IsLetter(r) {
+		l.end, l.loc, l.prev = pos, loc, prev
+		return false
+	}
+
+	return true
 }
 
 func (l *lexer) acceptWord(word string) bool {

@@ -113,7 +113,7 @@ func (v *astDeclareVistor) Process(node *Node) {
 			}
 		}
 		// 4. start symbol
-		if v.idsymtabl[n.StartSym] == nil {
+		if len(n.StartSym) != 0 && v.idsymtabl[n.StartSym] == nil {
 			//Append new name
 			id := &Idendity{
 				Name:  n.StartSym,
@@ -122,9 +122,9 @@ func (v *astDeclareVistor) Process(node *Node) {
 				Value: 0,
 			}
 			v.idsymtabl[n.StartSym] = id
-
+			v.startSym = v.idsymtabl[n.StartSym]
 		}
-		v.startSym = v.idsymtabl[n.StartSym]
+
 		//set other value
 		v.code = n.CodeList
 		v.union = n.Union

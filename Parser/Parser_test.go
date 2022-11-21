@@ -132,3 +132,102 @@ expr3:
 		root.LALR1 = lalr
 	}
 }
+
+func TestParser2(t *testing.T) {
+	str :=
+		`// Copyright 2013 The Go Authors. All rights reserved.
+	// Use of this source code is governed by a BSD-style
+	// license that can be found in the LICENSE file.
+	
+	// This is an example of a goyacc program.
+	// To build it:
+	// goyacc -p "expr" expr.y (produces y.go)
+	// go build -o expr y.go
+	// expr
+	// > <type an expression>
+	
+	%{
+	
+	package main
+	
+	import (
+		"bufio"
+		"bytes"
+		"fmt"
+		"io"
+		"log"
+		"math/big"
+		"os"
+		"unicode/utf8"
+	)
+	
+	%}
+	
+%left <tga> A B 
+%left C
+%start s
+%%
+s : A
+`
+	if tr, err := Parse(str); err != nil {
+		t.Error(err)
+	} else {
+		// work in test
+		var node Node = tr
+		w := DoWalker(&node, &RootVistor{})
+		lalr := w.BuildLALR1()
+		fmt.Println(lalr)
+		root := w.VistorNode.(*RootVistor)
+		root.LALR1 = lalr
+	}
+}
+
+func TestParser3(t *testing.T) {
+	str := `
+	%{
+		package main
+		%}
+		
+		%union{
+		String string
+		Expr expr 
+		}
+		
+		
+		%token<String>  IDENTIFIER
+		%token<String> NUMBER 100 
+		%type <Expr> expr assignment
+		
+		%left '+' '-'
+		%left '*' '/'
+		%%
+		start: expr {yylex.(*interpreter).parseResult = &astRoot{$1}} 
+			 | assignment {yylex.(*interpreter).parseResult = $1}
+		
+		expr:
+			  NUMBER {$$ = &number{$1} }
+			| IDENTIFIER { $$ = &variable{$1}}
+			| expr '+' expr { $$ = &binaryExpr{Op: '+', lhs: $1, rhs: $3} }
+			| expr '-' expr { $$ = &binaryExpr{Op: '-', lhs: $1, rhs: $3} }
+			| expr '*' expr { $$ = &binaryExpr{Op: '*', lhs: $1, rhs: $3} }
+			| expr '/' expr { $$ = &binaryExpr{Op: '/', lhs: $1, rhs: $3} }
+			| '(' expr ')'  { $$ = &parenExpr{$2}}
+			| '-' expr %prec '*' { $$ = &unaryExpr{$2} }
+			
+		
+		assignment:
+				  IDENTIFIER '=' expr {$$ = &assignment{$1, $3}}
+		%%
+`
+	if tr, err := Parse(str); err != nil {
+		t.Error(err)
+	} else {
+		// work in test
+		var node Node = tr
+		w := DoWalker(&node, &RootVistor{})
+		lalr := w.BuildLALR1()
+		fmt.Println(lalr)
+		root := w.VistorNode.(*RootVistor)
+		root.LALR1 = lalr
+	}
+}

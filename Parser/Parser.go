@@ -16,6 +16,9 @@ type parser struct {
 	peekCount int
 	pos       int
 	err       error
+
+	// map Def
+	TokenDefMap map[string]bool
 }
 
 type Node interface {
@@ -130,11 +133,12 @@ func Parse(input string) (*RootNode, error) {
 		lex: Lex(input),
 		pos: 0,
 	}
+	p.TokenDefMap = make(map[string]bool)
 	var nodeDeclare Node
 	if nodeDeclare = p.parseDeclare(); nodeDeclare == nil {
 		return nil, fmt.Errorf("do not has declare %s", p.err)
 	}
-
+	decl, _ := nodeDeclare.(*DeclareNode)
 	if !p.current.Is(Section) {
 		return nil, fmt.Errorf(
 			fmt.Sprintf("parser error! %s", p.current.Value),
@@ -143,14 +147,14 @@ func Parse(input string) (*RootNode, error) {
 	RuDlist := make([]RuleDef, 0)
 	p.next() // get the first identify
 	for {
-		if ruleslice := p.parseRule(); ruleslice == nil {
+		if ruleslice := p.parseRule(&decl.TokenDefList); ruleslice == nil {
 			break
 		} else {
 			RuDlist = append(RuDlist, ruleslice...)
 		}
 	}
 
-	if !p.current.Is(Section) {
+	if !p.current.Is(Section) && !p.current.Is(EOF) {
 		return nil, fmt.Errorf(fmt.Sprintf("parser err :%s", p.current.Value))
 	}
 	restcode := p.lex.input[p.current.EndAt:]
@@ -250,6 +254,7 @@ func (p *parser) parseTokendef() *TokenDef {
 				p.backup()
 			}
 			id.Value = value
+			p.TokenDefMap[id.Name] = true
 			Tokdef.IdentifyList = append(Tokdef.IdentifyList, id)
 		} else if p.current.Is(Charater) {
 			id := Idendity{
@@ -260,6 +265,7 @@ func (p *parser) parseTokendef() *TokenDef {
 				IDTyp: TERMID,
 				Alias: p.current.Value,
 			}
+			p.TokenDefMap[id.Name] = true
 			Tokdef.IdentifyList = append(Tokdef.IdentifyList, id)
 		} else {
 			break
@@ -270,8 +276,16 @@ func (p *parser) parseTokendef() *TokenDef {
 	return &Tokdef
 }
 
-func (p *parser) parsePrecList() []PrecDef {
+// The Same as token,
+/*
+
+%left symbols…
+
+%left <type> symbols…
+*/
+func (p *parser) parsePrecList(Tklist *[]TokenDef) []PrecDef {
 	var assocTy PrecAssocType
+	var Tokdef TokenDef
 	var IdName string
 	res := make([]PrecDef, 0)
 	if p.current.Is(LeftAssoc) {
@@ -282,13 +296,38 @@ func (p *parser) parsePrecList() []PrecDef {
 		assocTy = NonAssocType
 	}
 
+	Tag := ""
+	p.next()
+	// match <
+	if p.current.Is(LeftAngleBracket) {
+		// get Tag
+		p.next()
+		Tag = p.current.Value
+		p.next()
+		p.expect(RightAngleBracket) // match >
+	}
+	p.backup()
 	for {
 		p.next()
 		if p.current.Is(Identifier) || p.current.Is(Charater) {
 			// make loop get id or alias
 			IdName = p.current.Value
+			idvalue := 0
 			if p.current.Is(Charater) {
 				IdName = genTempName(IdName)
+				idvalue = int(p.current.Value[0])
+			}
+			if !p.TokenDefMap[IdName] {
+				id := Idendity{
+					Tag: Tag,
+					// noname need do for sepical.
+					Name:  IdName,
+					Value: idvalue,
+					IDTyp: TERMID,
+					Alias: "",
+				}
+				p.TokenDefMap[IdName] = true
+				Tokdef.IdentifyList = append(Tokdef.IdentifyList, id)
 			}
 			node := PrecDef{
 				IdName:    IdName,
@@ -299,6 +338,9 @@ func (p *parser) parsePrecList() []PrecDef {
 		} else {
 			break
 		}
+	}
+	if len(Tokdef.IdentifyList) != 0 {
+		*Tklist = append(*Tklist, Tokdef)
 	}
 	return res
 }
@@ -339,7 +381,9 @@ func (p *parser) parseTypeList() []TypeDef {
 	return TypedefList
 }
 
-// startsymbol
+// startsymbol indicatation the rules start from
+// %start cmds  it means cmds is the start symbols
+// or else , the rules start symbol must be `start`
 func (p *parser) parseStartSymbol() string {
 	p.next()
 	if p.current.Is(Identifier) {
@@ -357,7 +401,7 @@ func (p *parser) parseDeclare() Node {
 	var TokDefList []TokenDef
 	var PreDefList [][]PrecDef
 	var TypeDefList []TypeDef
-	var StartSym string
+	var StartSym string = "start"
 	p.next()
 	for !(p.current.Is(EOF) || p.current.Is(Section)) {
 		if p.current.Is(tokenError) {
@@ -381,7 +425,7 @@ func (p *parser) parseDeclare() Node {
 			p.current.Is(NoneAssoc) ||
 			// precDirective is just used to rules
 			p.current.Is(Precedence) {
-			PreDefList = append(PreDefList, p.parsePrecList())
+			PreDefList = append(PreDefList, p.parsePrecList(&TokDefList))
 			//Do not need call p.next
 			continue
 		}
@@ -415,8 +459,9 @@ func (p *parser) parseDeclare() Node {
 ID RuleDefine  {id/char %prec terminal-symbol  |ActionQuote}*
 	| RuleOR  {id/char |ActionQuote}*
 */
-func (p *parser) parseRule() []RuleDef {
+func (p *parser) parseRule(toklst *[]TokenDef) []RuleDef {
 	var Leftpart string
+	var Tokdef TokenDef
 	if p.current.Is(Identifier) {
 		Leftpart = p.current.Value
 		p.next()
@@ -449,6 +494,18 @@ func (p *parser) parseRule() []RuleDef {
 				ElemType: RightSyType,
 				Element:  genTempName(p.current.Value),
 			})
+			if !p.TokenDefMap[genTempName(p.current.Value)] {
+				id := Idendity{
+					Tag: "",
+					// noname need do for sepical.
+					Name:  genTempName(p.current.Value),
+					Value: int(p.current.Value[0]),
+					IDTyp: TERMID,
+					Alias: "",
+				}
+				p.TokenDefMap[genTempName(p.current.Value)] = true
+				Tokdef.IdentifyList = append(Tokdef.IdentifyList, id)
+			}
 		case Identifier:
 			rightpart = append(rightpart, RightSymOrAction{
 				ElemType: RightSyType,
@@ -475,10 +532,15 @@ func (p *parser) parseRule() []RuleDef {
 			}
 		default:
 			res = append(res, rule)
-			return res
+			goto out
+
 		}
 		rule.RightPart = rightpart
 		p.next()
+	}
+out:
+	if len(Tokdef.IdentifyList) != 0 {
+		*toklst = append(*toklst, Tokdef)
 	}
 	return res
 }
