@@ -203,6 +203,7 @@ func TestParser3(t *testing.T) {
 		%%
 		start: expr {yylex.(*interpreter).parseResult = &astRoot{$1}} 
 			 | assignment {yylex.(*interpreter).parseResult = $1}
+			 ;
 		
 		expr:
 			  NUMBER {$$ = &number{$1} }
@@ -213,10 +214,11 @@ func TestParser3(t *testing.T) {
 			| expr '/' expr { $$ = &binaryExpr{Op: '/', lhs: $1, rhs: $3} }
 			| '(' expr ')'  { $$ = &parenExpr{$2}}
 			| '-' expr %prec '*' { $$ = &unaryExpr{$2} }
+			;
 			
 		
 		assignment:
-				  IDENTIFIER '=' expr {$$ = &assignment{$1, $3}}
+				  IDENTIFIER '=' expr {$$ = &assignment{$1, $3}};
 		%%
 `
 	if tr, err := Parse(str); err != nil {

@@ -41,6 +41,7 @@ const (
 
 	RuleOR     Kind = "RuleOR"     // |
 	RuleDefine Kind = "RuleDefine" // :
+	RuleEnd    Kind = "RuleEnd"    // ;
 
 	LeftAngleBracket  Kind = "LeftAngleBracket"  // Aangle brackets <
 	RightAngleBracket Kind = "RightAngleBracket" // RightAngleBracket >
@@ -90,6 +91,8 @@ func rootState(l *lexer) stateFn {
 		l.emit(RuleOR)
 	case r == ':':
 		l.emit(RuleDefine)
+	case r == ';':
+		l.emit(RuleEnd)
 	case r == ' ', r == '\t', r == '\n': //skip the space
 		l.ignore()
 	// case  alpha , identify

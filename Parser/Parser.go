@@ -481,10 +481,14 @@ func (p *parser) parseRule(toklst *[]TokenDef) []RuleDef {
 		p.next()
 		t2 := p.current
 		p.backup2(t1) // backup, then need next
-		if t1.Is(Identifier) && t2.Is(RuleDefine) {
+		if t1.Is(RuleEnd) || (t1.Is(Identifier) && t2.Is(RuleDefine)) {
 			res = append(res, rule)
 			// get next identify
 			p.next()
+			if p.current.Is(RuleEnd) {
+				//skip ruleEnd
+				p.next()
+			}
 			break
 		}
 		p.next()
@@ -537,6 +541,7 @@ func (p *parser) parseRule(toklst *[]TokenDef) []RuleDef {
 		}
 		rule.RightPart = rightpart
 		p.next()
+
 	}
 out:
 	if len(Tokdef.IdentifyList) != 0 {
