@@ -122,9 +122,8 @@ func (v *astDeclareVistor) Process(node *Node) {
 				Value: 0,
 			}
 			v.idsymtabl[n.StartSym] = id
-			v.startSym = v.idsymtabl[n.StartSym]
 		}
-
+		v.startSym = v.idsymtabl[n.StartSym]
 		//set other value
 		v.code = n.CodeList
 		v.union = n.Union
@@ -319,6 +318,11 @@ func (w *Walker) BuildLALR1() *lalr.LALR1 {
 		}
 		g.ResolveSymbols()
 		g.CalculateEpsilonClosure()
+		if infLoop := g.CalculateCanTerminate(); len(infLoop) != 0 {
+			g.PrintInfLoop(infLoop)
+			panic("Dected infinite loop")
+		}
+
 		item_var := item.NewItem(0, 0)
 		Icloures := item.NewItemCloure()
 		Icloures.InsertItem(item_var)

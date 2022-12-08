@@ -86,6 +86,8 @@ func (g *Grammar) CalculateEpsilonClosure() {
 			if every_isEpsilon {
 				if !(r.LeftPart.IsEpsilonClosure) {
 					r.LeftPart.IsEpsilonClosure = true
+					// epsilon is terminate too
+					r.LeftPart.CanTerminate = true
 					change++
 				}
 			}
@@ -95,6 +97,47 @@ func (g *Grammar) CalculateEpsilonClosure() {
 		}
 	}
 }
+
+//calculate all epsilon
+func (g *Grammar) CalculateCanTerminate() []*symbol.Symbol {
+	change := 0
+	for {
+		change = 0
+		for _, r := range g.ProductoinRules {
+			//for every sym in RightPart, is IsEpsilonClosure, Is EpsilonClosure
+			//empty is true
+			every_CanTerm := true
+			for _, every_sy := range r.RighPart {
+				every_CanTerm = every_CanTerm && every_sy.CanTerminate
+			}
+			if every_CanTerm {
+				if !(r.LeftPart.CanTerminate) {
+					r.LeftPart.CanTerminate = true
+					change++
+				}
+			}
+		}
+		if change == 0 {
+			break
+		}
+	}
+	var inf_cycles []*symbol.Symbol
+	for sy := range g.VnSet {
+		if !sy.CanTerminate {
+			inf_cycles = append(inf_cycles, sy)
+		}
+	}
+	return inf_cycles
+}
+
+func (g Grammar) PrintInfLoop(some []*symbol.Symbol) {
+	fmt.Println("Error:")
+	for _, s := range some {
+		fmt.Printf("%s ", s.Name)
+	}
+	fmt.Println(" have Infinite recursion loop")
+}
+
 func (g Grammar) ShowAllSymbols() {
 	for _, s := range g.Symbols {
 		s.Show()

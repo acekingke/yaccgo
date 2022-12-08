@@ -21,12 +21,13 @@ type Symbol struct {
 	Tag              string // Tag indicate the type of symbol
 	IsNonTerminator  bool
 	IsEpsilonClosure bool
+	CanTerminate     bool //check weather is has inf loop
 	PrecType         E_Precedence
 	Prec             int
 }
 
 func NewSymbol(id uint, name string) *Symbol {
-	return &Symbol{ID: id, Name: name, PrecType: NONE, Prec: -1}
+	return &Symbol{ID: id, Name: name, PrecType: NONE, Prec: -1, CanTerminate: true}
 }
 
 func (s *Symbol) SetValue(val int) {
@@ -43,6 +44,7 @@ func (s *Symbol) GetTag() string {
 
 func (s *Symbol) SetNT() {
 	s.IsNonTerminator = true
+	s.CanTerminate = false
 }
 
 func (s *Symbol) SetEpsilon() {

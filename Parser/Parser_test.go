@@ -168,6 +168,7 @@ func TestParser2(t *testing.T) {
 %start s
 %%
 s : A
+
 `
 	if tr, err := Parse(str); err != nil {
 		t.Error(err)
@@ -219,6 +220,39 @@ func TestParser3(t *testing.T) {
 		
 		assignment:
 				  IDENTIFIER '=' expr {$$ = &assignment{$1, $3}};
+		%%
+`
+	if tr, err := Parse(str); err != nil {
+		t.Error(err)
+	} else {
+		// work in test
+		var node Node = tr
+		w := DoWalker(&node, &RootVistor{})
+		lalr := w.BuildLALR1()
+		fmt.Println(lalr)
+		root := w.VistorNode.(*RootVistor)
+		root.LALR1 = lalr
+	}
+}
+
+func TestParserInifLoop(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("The code did not panic")
+		}
+	}()
+	str := `
+	%{
+		package main
+		%}
+		
+		%left <tga> A B 
+%left C
+%start s
+%%
+s : A
+A : B
+B : A
 		%%
 `
 	if tr, err := Parse(str); err != nil {
