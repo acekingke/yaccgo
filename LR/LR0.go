@@ -20,7 +20,7 @@ func NewLR0() *LR0 {
 //
 func (lr0 *LR0) CheckIsExist(IC *item.ItemCloure) (int, bool) {
 	var found bool = true
-	for _, ic_in := range lr0.LR0Closure {
+	for index, ic_in := range lr0.LR0Closure {
 		if len(ic_in.Items) == len(IC.Items) {
 			found = true
 			//if ic_in item all equal IC.items, return true
@@ -28,7 +28,7 @@ func (lr0 *LR0) CheckIsExist(IC *item.ItemCloure) (int, bool) {
 				found = found && (*ic_in.Items[i] == *IC.Items[i])
 			}
 			if found {
-				return ic_in.Index, true
+				return index, true
 			}
 
 		}
@@ -51,8 +51,8 @@ func (lr0 *LR0) InsertItemClosure(IC *item.ItemCloure, needCheck bool) int {
 	if notExist {
 		IC.Index = len(lr0.LR0Closure)
 		lr0.LR0Closure = append(lr0.LR0Closure, IC)
-		return 1
+		return IC.Index
 	}
 
-	return 0
+	return -1
 }

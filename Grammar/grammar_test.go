@@ -177,3 +177,61 @@ func TestGrammar_CalculateEpsilonClosure(t *testing.T) {
 	}
 
 }
+
+// Test None Recur
+func TestGrammar_ComputeGotoItemNoneRec(t *testing.T) {
+	g := NewGrammar()
+	g.GenStartSymbol()
+	/*
+		(1) E → E * B
+		(2) E → E + B
+		(3) E → B
+		(4) B → NUMBER
+	*/
+	dollar := symbol.NewSymbol(1, "$")
+	E := symbol.NewSymbol(2, "E")
+	PLUS := symbol.NewSymbol(3, "PLUS")
+	B := symbol.NewSymbol(4, "B")
+	ONE := symbol.NewSymbol(5, "1")
+	ZERO := symbol.NewSymbol(6, "0")
+	MULTI := symbol.NewSymbol(7, "*")
+	g.InsertNewSymbol(dollar)
+	g.InsertNewSymbol(E)
+	g.InsertNewSymbol(PLUS)
+	g.InsertNewSymbol(B)
+	g.InsertNewSymbol(ONE)
+	g.InsertNewSymbol(ZERO)
+	g.InsertNewSymbol(MULTI)
+
+	// 0 start -> E
+	g.InsertNewRules(rule.NewProductoinRule(g.StartSymbol, []*symbol.Symbol{
+		E}))
+	//1 E → E * B
+	g.InsertNewRules(rule.NewProductoinRule(E, []*symbol.Symbol{E, MULTI, B}))
+	//(2) E → E + B
+	g.InsertNewRules(rule.NewProductoinRule(E, []*symbol.Symbol{E, PLUS, B}))
+	//(3) E → B
+	g.InsertNewRules(rule.NewProductoinRule(E, []*symbol.Symbol{B}))
+	//(4) B -> 1
+	g.InsertNewRules(rule.NewProductoinRule(B, []*symbol.Symbol{ONE}))
+	// (5) B -> 0
+	g.InsertNewRules(rule.NewProductoinRule(B, []*symbol.Symbol{ZERO}))
+	g.ResolveSymbols()
+	g.CalculateEpsilonClosure()
+	for sy := range g.VnSet {
+		sy.Show()
+	}
+	fmt.Println("................")
+	item_var := item.NewItem(0, 0)
+	Icloures := item.NewItemCloure()
+	Icloures.InsertItem(item_var)
+	g.ComputeIClosure(Icloures)
+	g.LR0.InsertItemClosure(Icloures, true)
+	var i int = 0
+	for i < len(g.LR0.LR0Closure) {
+		g.ComputeGotoItemNoneRec(g.LR0.LR0Closure[i])
+		i++
+	}
+
+	g.Show()
+}

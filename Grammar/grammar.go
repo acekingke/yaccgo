@@ -189,6 +189,65 @@ func (g *Grammar) ComputeGotoItemRecursive(IC *item.ItemCloure) {
 	}
 }
 
+func (g *Grammar) ComputeAllGoto() {
+	var i int = 0
+	for i < len(g.LR0.LR0Closure) {
+		g.ComputeGotoItemNoneRec(g.LR0.LR0Closure[i])
+		if len(g.LR0.LR0Closure) >= 2000 {
+			g.Show()
+			panic("too manay states!")
+		}
+		i++
+	}
+}
+
+//compute the closure goto item
+func (g *Grammar) ComputeGotoItemNoneRec(IC *item.ItemCloure) {
+	change := 0
+	for _, it := range IC.Items {
+		r := g.ProductoinRules[it.RuleIndex]
+		if it.Dot < len(r.RighPart) {
+			sy := r.RighPart[it.Dot]
+			if goToPointer := IC.FindItemClosure(sy); goToPointer != nil {
+				ExistIC := goToPointer.ICref
+				if goToPointer.ItemCl != -1 {
+					ExistIC = g.LR0.LR0Closure[goToPointer.ItemCl]
+				}
+				change += ExistIC.InsertItem(item.NewItem(it.RuleIndex, it.Dot+1))
+				g.ComputeIClosure(ExistIC)
+
+			} else {
+				newIC := item.NewItemCloure()
+				newIC.InsertItem(item.NewItem(it.RuleIndex, it.Dot+1))
+
+				var index_goto int = -1
+				g.ComputeIClosure(newIC)
+
+				newGoto := &item.GoToCloure{Sym: sy, ItemCl: index_goto, ICref: newIC}
+				change += IC.InsertGoTO(newGoto)
+			}
+
+			if change == 0 { //find a cycle, return
+				return
+			}
+		} // if Dot == len, just return
+	}
+
+	for _, goItem := range IC.GoToMap {
+		IcTemp := goItem.ICref
+		var index_goto int = -1
+		if exist_index, exist := g.LR0.CheckIsExist(IcTemp); exist {
+			index_goto = exist_index
+		} else {
+			//check weath exist IC
+			g.LR0.InsertItemClosure(IcTemp, false)
+			index_goto = IcTemp.Index
+		}
+		goItem.ItemCl = index_goto
+		goItem.ICref = nil
+	}
+}
+
 func (g *Grammar) ShowCloure(IC *item.ItemCloure) {
 	fmt.Printf("--------state %d------------\n", IC.Index)
 	for _, it := range IC.Items {

@@ -13,6 +13,7 @@ type Item struct {
 type GoToCloure struct {
 	Sym    *symbol.Symbol
 	ItemCl int
+	ICref  *ItemCloure
 }
 
 type ItemCloure struct {
@@ -20,7 +21,7 @@ type ItemCloure struct {
 	Items   []*Item // the item clouser
 	itemMap map[Item]bool
 	GoTo    []*GoToCloure //ItemClure Index in LR0
-	goToMap map[*symbol.Symbol]*GoToCloure
+	GoToMap map[*symbol.Symbol]*GoToCloure
 }
 
 func NewItem(r_index int, dot int) *Item {
@@ -31,7 +32,7 @@ func NewItemCloure() *ItemCloure {
 	return &ItemCloure{Items: make([]*Item, 0),
 		GoTo:    make([]*GoToCloure, 0),
 		itemMap: make(map[Item]bool),
-		goToMap: make(map[*symbol.Symbol]*GoToCloure)}
+		GoToMap: make(map[*symbol.Symbol]*GoToCloure)}
 }
 
 func (IC *ItemCloure) InsertItem(It *Item) int {
@@ -45,14 +46,14 @@ func (IC *ItemCloure) InsertItem(It *Item) int {
 
 //one Core may be has many core Item
 func (IC *ItemCloure) InsertGoTO(Goto *GoToCloure) int {
-	if IC.goToMap[Goto.Sym] != nil {
+	if IC.GoToMap[Goto.Sym] != nil {
 		return 0
 	}
 	IC.GoTo = append(IC.GoTo, Goto)
-	IC.goToMap[Goto.Sym] = Goto
+	IC.GoToMap[Goto.Sym] = Goto
 	return 1
 }
 
 func (IC *ItemCloure) FindItemClosure(sy *symbol.Symbol) *GoToCloure {
-	return IC.goToMap[sy]
+	return IC.GoToMap[sy]
 }

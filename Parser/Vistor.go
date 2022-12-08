@@ -324,7 +324,7 @@ func (w *Walker) BuildLALR1() *lalr.LALR1 {
 		Icloures.InsertItem(item_var)
 		g.ComputeIClosure(Icloures)
 		g.LR0.InsertItemClosure(Icloures, true)
-		g.ComputeGotoItemRecursive(Icloures)
+		g.ComputeAllGoto()
 	} else {
 		panic("not generate root node")
 	}
