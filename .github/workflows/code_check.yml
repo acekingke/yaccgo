@@ -11,15 +11,6 @@ jobs:
   gofmt:
     runs-on: ubuntu-latest
     steps:
-    - name: Setup Graphviz
-      uses: ts-graphviz/setup-graphviz@v1
-      with:
-        # graphviz version on Ubuntu.
-        ubuntu-graphviz-version: '2.42.2-3build2'
-        # libgraphviz-dev version on Ubuntu.
-        ubuntu-libgraphvizdev-version: '2.42.2-3build2'
-        #  graphviz version on Windows.
-        windows-graphviz-version: '2.49.3'
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
