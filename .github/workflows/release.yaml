@@ -24,7 +24,7 @@ jobs:
         with:
           distribution: goreleaser
           version: v1.8.3
-          args: release --rm-dist
+          args: release -f .gorelease.yaml --rm-dist
           workdir: yaccgo/
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
