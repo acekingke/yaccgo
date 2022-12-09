@@ -52,6 +52,22 @@ look ahead $, use Reduce:PROG -> PROG E NL , go to state 1
 Shift PROG, push state 1
 0
 ```
+# parser with context
+if you want build several parser in one app, you should use generate parser with context. Now it is just supported in Go
+add `-o` option in generate command, for example:
+```
+ bin/yaccgo generate go  -o examples/e.y  out/e.go 
+```
+then, you should make context before using the parser, for example like this:
+```
+func main() {
+	c := MakeParserContext()
+	v := c.Parser("nnn")
+	fmt.Println(v)
+}
+
+```
+
 # Web Debuger
 If you want to debug the parser visually, you can use yaccgo debuger in browser.
 ![debuger](debugtool.gif)
