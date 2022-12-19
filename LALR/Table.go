@@ -83,6 +83,24 @@ func (lalr *LALR1) ResolveConflict(act01, act02 *Action) (*Action, error) {
 	return nil, fmt.Errorf("other error")
 }
 
+// resolve with default method
+// shift/reduce , resolve it with shift
+// reduce/reduce , resolve it with rule which is first defined
+func (lalr *LALR1) UseDefaultResolveConflict(act01, act02 *Action) *Action {
+	if act01.ActionType == SHIFT {
+		return act01
+	} else if act02.ActionType == SHIFT {
+		return act02
+	} else {
+		// double reduce
+		if act01.ActionIndex > act02.ActionIndex {
+			return act02
+		} else {
+			return act01
+		}
+	}
+}
+
 // check weath it has shift/reduce conflict or reduce/reduce conflict
 func (lalr *LALR1) CheckAndResolveConflict(state int, tranlist []Transistor) (map[int][]*Action, error) {
 	// key is symbol, slice is action list, minus is the reduce, postive is shift
@@ -133,8 +151,10 @@ func (lalr *LALR1) CheckAndResolveConflict(state int, tranlist []Transistor) (ma
 					break
 				}
 				if act, err = lalr.ResolveConflict(res[0], res[1]); err != nil {
-					return action_set, fmt.Errorf("cannot resolve the conflic %d, sym %d, conflict Type %s, %s ",
-						state, syIndex, getActionTypeName(res[0].ActionType), getActionTypeName(res[1].ActionType))
+
+					// fmt.Printf("warning: has the conflic %d, sym %d, conflict Type %s, %s  use default resolve",
+					// 	state, syIndex, getActionTypeName(res[0].ActionType), getActionTypeName(res[1].ActionType))
+					act = lalr.UseDefaultResolveConflict(res[0], res[1])
 				}
 				res[1] = act
 				res = res[1:]
@@ -160,6 +180,7 @@ func (lalr *LALR1) GenTable() ([][]int, error) {
 	tableGen := [][]int{}
 	for q := 0; q < len(lalr.G.LR0.LR0Closure); q++ {
 		if set, err := lalr.CheckAndResolveConflict(q, trans_set[q]); err != nil {
+			lalr.G.ShowCloure(lalr.G.LR0.LR0Closure[q])
 			lalr.ShowAndCheckConflict(q, trans_set[q])
 			return nil, err
 		} else {
