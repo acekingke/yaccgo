@@ -31,7 +31,7 @@ func NewGrammar() Grammar {
 	return Grammar{
 		VtSet:      make(map[*symbol.Symbol]bool),
 		VnSet:      make(map[*symbol.Symbol]bool),
-		SymbolsMap: make(map[string]*symbol.Symbol, 0),
+		SymbolsMap: make(map[string]*symbol.Symbol),
 		LR0:        lr.NewLR0(),
 	}
 }

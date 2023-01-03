@@ -152,8 +152,8 @@ func (lalr *LALR1) CheckAndResolveConflict(state int, tranlist []Transistor) (ma
 				}
 				if act, err = lalr.ResolveConflict(res[0], res[1]); err != nil {
 
-					// fmt.Printf("warning: has the conflic %d, sym %d, conflict Type %s, %s  use default resolve",
-					// 	state, syIndex, getActionTypeName(res[0].ActionType), getActionTypeName(res[1].ActionType))
+					fmt.Printf("warning: has the conflic %d, sym %d, conflict Type %s, %s  use default resolve",
+						state, syIndex, getActionTypeName(res[0].ActionType), getActionTypeName(res[1].ActionType))
 					act = lalr.UseDefaultResolveConflict(res[0], res[1])
 				}
 				res[1] = act
