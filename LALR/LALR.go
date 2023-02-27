@@ -122,7 +122,7 @@ func (lalr *LALR1) fetchOneDr(tr Transistor) []int {
 	return res
 }
 
-//calc reads Relation
+// calc reads Relation
 func (lalr *LALR1) calcReadsRelation(transIndex int) []Relation {
 	tr := lalr.trans[transIndex]
 	var res []Relation = nil
@@ -139,7 +139,7 @@ func (lalr *LALR1) calcReadsRelation(transIndex int) []Relation {
 	return res
 }
 
-//func calc all reads relations
+// func calc all reads relations
 func (lalr *LALR1) CalcAllReadRelations() []Relation {
 	var res []Relation = nil
 	for key := range lalr.DRSet {
@@ -149,7 +149,7 @@ func (lalr *LALR1) CalcAllReadRelations() []Relation {
 	return res
 }
 
-//calculate the Reads Set
+// calculate the Reads Set
 func (lalr *LALR1) CalcReadSet() {
 	X := []int{}
 	for key := range lalr.DRSet {
@@ -160,7 +160,7 @@ func (lalr *LALR1) CalcReadSet() {
 	Digraph(X, R, lalr.DRSet, &lalr.ReadSet)
 }
 
-//calc the DR
+// calc the DR
 func (lalr *LALR1) CalcDR() {
 
 	for _, tr := range lalr.trans {
@@ -175,11 +175,11 @@ func (lalr *LALR1) CalcDR() {
 	lalr.DRSet[0] = append(lalr.DRSet[0], []int{1}...)
 }
 
-//-----------------Caculate the Includes relation-------------
+// -----------------Caculate the Includes relation-------------
 // B-> beta A gama if gama can episilon, p' --- beta --> p
 // (p, A) includes (p', B)
 //
-//calculate the include Relation.
+// calculate the include Relation.
 func (lalr *LALR1) CaclIncludeRelation(tr int) []Relation {
 	res := []Relation{}
 	sy := lalr.G.Symbols[lalr.trans[tr].sym_or_rule]
@@ -199,7 +199,7 @@ func (lalr *LALR1) CaclIncludeRelation(tr int) []Relation {
 	return res
 }
 
-//calc all the relation
+// calc all the relation
 func (lalr *LALR1) CaclIncludes() []Relation {
 	var res []Relation = nil
 	for key := range lalr.DRSet {
@@ -209,7 +209,7 @@ func (lalr *LALR1) CaclIncludes() []Relation {
 	return res
 }
 
-//calculate lookback relation
+// calculate lookback relation
 func (lalr *LALR1) CalcLookbacks() []Relation {
 	var res []Relation = nil
 
@@ -239,7 +239,7 @@ func (lalr *LALR1) CalcFollowSet() {
 	Digraph(X, R, lalr.ReadSet, &lalr.FollowSet)
 }
 
-//calc the look ahead Set
+// calc the look ahead Set
 func (lalr *LALR1) CalcLookAheadSet() {
 	X := []int{}
 	Set := make(map[int][]int)

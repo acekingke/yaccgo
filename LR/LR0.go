@@ -17,7 +17,6 @@ func NewLR0() *LR0 {
 	return &LR0{LR0Closure: make([]*item.ItemCloure, 0)}
 }
 
-//
 func (lr0 *LR0) CheckIsExist(IC *item.ItemCloure) (int, bool) {
 	var found bool = true
 	for index, ic_in := range lr0.LR0Closure {

@@ -44,7 +44,7 @@ func (IC *ItemCloure) InsertItem(It *Item) int {
 	return 1
 }
 
-//one Core may be has many core Item
+// one Core may be has many core Item
 func (IC *ItemCloure) InsertGoTO(Goto *GoToCloure) int {
 	if IC.GoToMap[Goto.Sym] != nil {
 		return 0

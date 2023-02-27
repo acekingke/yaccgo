@@ -62,7 +62,7 @@ func (g *Grammar) SetStartSymbol(s *symbol.Symbol) {
 	g.StartSymbol = s
 }
 
-//set NonTerminator set
+// set NonTerminator set
 func (g *Grammar) ResolveSymbols() {
 	for _, s := range g.Symbols {
 		if !s.IsNonTerminator {
@@ -71,7 +71,7 @@ func (g *Grammar) ResolveSymbols() {
 	}
 }
 
-//calculate all epsilon
+// calculate all epsilon
 func (g *Grammar) CalculateEpsilonClosure() {
 	change := 0
 	for {
@@ -98,7 +98,7 @@ func (g *Grammar) CalculateEpsilonClosure() {
 	}
 }
 
-//calculate all epsilon
+// calculate all epsilon
 func (g *Grammar) CalculateCanTerminate() []*symbol.Symbol {
 	change := 0
 	for {
@@ -192,7 +192,7 @@ func (g *Grammar) ComputeIClosure(IC *item.ItemCloure) {
 	})
 }
 
-//compute the closure goto item
+// compute the closure goto item
 func (g *Grammar) ComputeGotoItemRecursive(IC *item.ItemCloure) {
 	change := 0
 	for _, it := range IC.Items {
@@ -244,7 +244,7 @@ func (g *Grammar) ComputeAllGoto() {
 	}
 }
 
-//compute the closure goto item
+// compute the closure goto item
 func (g *Grammar) ComputeGotoItemNoneRec(IC *item.ItemCloure) {
 	change := 0
 	for _, it := range IC.Items {

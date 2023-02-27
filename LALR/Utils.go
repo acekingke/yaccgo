@@ -36,7 +36,7 @@ func (lalr *LALR1) isTermSymIndex(in uint) bool {
 	return !lalr.fetchSymbol(int(in)).IsNonTerminator
 }
 
-//show Dr set
+// show Dr set
 func (lalr *LALR1) ShowDrSet() {
 	for trIndex, set := range lalr.DRSet {
 		q := lalr.trans[trIndex].q
@@ -110,7 +110,7 @@ func (lalr *LALR1) seqenceCanEpsilon(slice []*symbol.Symbol) bool {
 	return ret
 }
 
-//func fetch A --> omega
+// func fetch A --> omega
 func (lalr *LALR1) fetchReduceTransistor() []Transistor {
 	res := []Transistor{}
 	for _, tr := range lalr.trans {

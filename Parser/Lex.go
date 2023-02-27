@@ -176,7 +176,7 @@ func ActionQuoteState(l *lexer) stateFn {
 	return rootState
 }
 
-// 'a' '\'' and other ,'ab' is error
+// 'a' '\” and other ,'ab' is error
 func charaterState(l *lexer) stateFn {
 	value := ""
 	if r := l.next(); r != '\\' {
@@ -319,7 +319,8 @@ func CodeQuoteBegin(l *lexer) stateFn {
 	return rootState
 }
 
-/* %uinon {
+/*
+	%uinon {
 
 }
 */

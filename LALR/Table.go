@@ -46,7 +46,7 @@ func (lalr *LALR1) ShowAndCheckConflict(state int, tranlist []Transistor) {
 	fmt.Println("\n========")
 }
 
-//  Resolve the conflict by Prec
+// Resolve the conflict by Prec
 func (lalr *LALR1) ResolveConflict(act01, act02 *Action) (*Action, error) {
 	act_first := act01
 	act_second := act02

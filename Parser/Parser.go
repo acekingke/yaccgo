@@ -79,7 +79,7 @@ type PrecDef struct {
 }
 
 // type
-//%type	<num>	expr expr1 expr2 expr3
+// %type	<num>	expr expr1 expr2 expr3
 type TypeDef struct {
 	Tag    string
 	IdName string
@@ -113,7 +113,7 @@ type RuleDef struct {
 	PrecSym   string // which prec symbol
 }
 
-//RuleDefNode
+// RuleDefNode
 type RuleDefNode struct {
 	Base
 	RuleDefList []RuleDef

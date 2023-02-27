@@ -76,7 +76,7 @@ class StateSym  {
 	b.CodeLast = b.vnode.GetCodeCopy()
 }
 
-//  make AnalyTable
+// make AnalyTable
 func (b *TsBuilder) buildAnalyTable() {
 	AnalyTable := `
 var StateActionArray :number[][] =[
